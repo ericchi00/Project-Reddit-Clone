@@ -7,3 +7,51 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+body {
+  max-width: 100vw;
+  min-height: 100vh;
+}
+
+ul,
+li {
+  list-style-type: none;
+}
+
+header {
+  padding: 1rem;
+}
+
+header ul {
+  display: flex;
+  justify-content: space-between;
+}
+
+.left-header {
+  display: flex;
+  gap: 1rem;
+}
+
+.link-header {
+  display: flex;
+  align-items: flex-end;
+  font-size: larger;
+}
+
+.logo {
+  display: flex;
+  gap: 1rem;
+}
+
+.logo p {
+  font-size: xx-large;
+  font-weight: 500;
+}
+
+.logo img {
+  width: 50px;
+}
+
+#search {
+  height: 25px;
+}

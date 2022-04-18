@@ -14,7 +14,12 @@ const Header = () => {
 						<li className="link-header">Hot</li>
 						<li className="link-header">New</li>
 					</div>
-					<input type="text" id="search" name="search" placeholder="Search" />
+					<div className="google-login">
+						<p>
+							Google Sign(this will display user name or it will display sign
+							in)
+						</p>
+					</div>
 				</ul>
 			</nav>
 		</header>

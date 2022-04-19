@@ -63,9 +63,9 @@ const SubredditList = (props) => {
 					);
 				})}
 			</ul>
-			<div className="subreddit-create" onClick={() => setCreate(true)}>
+			<button type='button' className="subreddit-create" onClick={() => setCreate(true)}>
 				Create Subreddit
-			</div>
+			</button>
 			{create ? (
 				<div className="create-subreddit-form">
 					<input

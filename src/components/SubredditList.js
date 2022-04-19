@@ -9,6 +9,7 @@ import {
 	onSnapshot,
 	query,
 } from 'firebase/firestore';
+import { Link } from 'react-router-dom';
 
 const SubredditList = (props) => {
 	const [create, setCreate] = useState(false);
@@ -37,7 +38,8 @@ const SubredditList = (props) => {
 
 	const handleInput = (e) => {
 		const { value } = e.target;
-		setName(value.toLowerCase());
+		const processValue = value.toLowerCase().replace(/[^A-Z0-9]+/gi, '');
+		setName(processValue);
 	};
 
 	const onSubmit = async (e) => {
@@ -59,7 +61,11 @@ const SubredditList = (props) => {
 			<input type="text" id="search" name="search" placeholder="Search" />
 			<ul>
 				{list.map((item, i) => {
-					return <li key={i}>{item}</li>;
+					return (
+						<Link to={`/r/${item}`}>
+							<li key={i}>{item}</li>
+						</Link>
+					);
 				})}
 			</ul>
 			{/* {this will map a list of subreddits, maybe 10 or 15 } */}

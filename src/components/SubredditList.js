@@ -6,7 +6,6 @@ import {
 	getDoc,
 	getDocs,
 	setDoc,
-	onSnapshot,
 	query,
 } from 'firebase/firestore';
 import { Link } from 'react-router-dom';
@@ -31,10 +30,6 @@ const SubredditList = (props) => {
 		};
 		getSubreddits();
 	}, [create]);
-
-	const createSubreddit = () => {
-		setCreate(true);
-	};
 
 	const handleInput = (e) => {
 		const { value } = e.target;
@@ -62,14 +57,13 @@ const SubredditList = (props) => {
 			<ul>
 				{list.map((item, i) => {
 					return (
-						<Link to={`/r/${item}`}>
-							<li key={i}>{item}</li>
+						<Link to={`/r/${item}`} key={i}>
+							<li>r/{item}</li>
 						</Link>
 					);
 				})}
 			</ul>
-			{/* {this will map a list of subreddits, maybe 10 or 15 } */}
-			<div className="subreddit-create" onClick={createSubreddit}>
+			<div className="subreddit-create" onClick={() => setCreate(true)}>
 				Create Subreddit
 			</div>
 			{create ? (
@@ -78,7 +72,7 @@ const SubredditList = (props) => {
 						type="text"
 						id="create"
 						name="create"
-						placeholder="Subreddit"
+						placeholder="Enter Subreddit Name"
 						onChange={(e) => handleInput(e)}
 					/>
 					<button type="button" onClick={(e) => onSubmit(e)}>
@@ -86,7 +80,6 @@ const SubredditList = (props) => {
 					</button>
 				</div>
 			) : null}
-			{console.log(list)}
 		</div>
 	);
 };

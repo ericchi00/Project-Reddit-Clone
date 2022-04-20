@@ -12,38 +12,54 @@ import {
 	signOut,
 } from 'firebase/auth';
 import './style/index.css';
+import { getFirestore, doc, setDoc, getDoc } from '@firebase/firestore';
 
 const App = () => {
 	const [signedIn, setSignedIn] = useState(false);
 	const [username, setUserName] = useState('');
+	const firestore = getFirestore();
 	const provider = new GoogleAuthProvider();
 	const auth = getAuth();
 
 	useEffect(() => {
-		onAuthStateChanged(auth, (user) => {
+		onAuthStateChanged(auth, async (user) => {
 			if (user) {
-				setUserName(user.displayName);
 				setSignedIn(true);
-			} else {
-				return;
-			}
+				setUserName(user.displayName);
+				const userFile = doc(firestore, 'UserLikes', user.displayName);
+				const checkIfExists = await getDoc(userFile);
+				if (!checkIfExists.exists()) {
+					await setDoc(doc(firestore, 'UserLikes', user.displayName), {
+						name: user.displayName,
+					});
+				} else return;
+			} else return;
 		});
 	});
 
+	// const onSubmit = async (e) => {
+	// 	e.preventDefault();
+	// 	const db = getFirestore();
+	// 	const checkIfSubredditExists = doc(db, 'Subreddit', name);
+	// 	const subreddit = await getDoc(checkIfSubredditExists);
+	// 	if (!subreddit.exists()) {
+	// 		await setDoc(doc(db, 'Subreddit', name), { name: name });
+	// 		setCreate(false);
+	// 	} else {
+	// 		const create = document.getElementsByName('create')[0];
+	// 		create.value = '';
+	// 		create.placeholder = 'Subreddit already exists';
+	// 	}
+	// };
+
 	const login = () => {
-		signInWithPopup(auth, provider)
-			.then((result) => {
-				const credential = GoogleAuthProvider.credentialFromResult(result);
-				const token = credential.accessToken;
-				const user = result.user;
-			})
-			.catch((error) => {
-				const errorCode = error.code;
-				const errorMessage = error.message;
-				const email = error.email;
-				const credential = GoogleAuthProvider.credentialFromError(error);
-				console.log(errorCode, errorMessage, email, credential);
-			});
+		signInWithPopup(auth, provider).catch((error) => {
+			const errorCode = error.code;
+			const errorMessage = error.message;
+			const email = error.email;
+			const credential = GoogleAuthProvider.credentialFromError(error);
+			console.log(errorCode, errorMessage, email, credential);
+		});
 	};
 
 	const signout = () => {
@@ -69,7 +85,7 @@ const App = () => {
 				<Route path="/" element="" />
 				<Route
 					path="/r/:subreddit"
-					element={<Subreddit username={username} />}
+					element={<Subreddit username={username} signedIn={signedIn} />}
 				/>
 				<Route path="/r/:subreddit/:postTitle" element={<Comment />} />
 			</Routes>

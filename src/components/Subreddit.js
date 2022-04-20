@@ -3,7 +3,6 @@ import {
 	getFirestore,
 	query,
 	getDocs,
-	serverTimestamp,
 	addDoc,
 	orderBy,
 } from '@firebase/firestore';
@@ -11,7 +10,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router';
 import Post from './Post';
 
-const Subreddit = ({ username }) => {
+const Subreddit = ({ username, signedIn }) => {
 	const [posts, setPosts] = useState([]);
 	const [createPost, setCreatePost] = useState(false);
 	const [title, setTitle] = useState('');
@@ -20,7 +19,6 @@ const Subreddit = ({ username }) => {
 
 	useEffect(() => {
 		grabPostsFromFirebase();
-		console.log('read');
 	}, [subreddit, createPost]);
 
 	const grabPostsFromFirebase = async () => {
@@ -34,13 +32,6 @@ const Subreddit = ({ username }) => {
 			postsArr.push(doc.data());
 		});
 		setPosts(postsArr);
-
-		// const unsub = onSnapshot(q, (QuerySnapshot) => {
-		// 	QuerySnapshot.forEach((doc) => {
-		// 		postsArr.push(doc.data());
-		// 	});
-		// 	setPosts(postsArr);
-		// });
 	};
 
 	const titleHandler = (e) => {
@@ -61,7 +52,7 @@ const Subreddit = ({ username }) => {
 			score: 1,
 			title: title,
 			text: text,
-			timestamp: serverTimestamp(),
+			timestamp: Date.now(),
 		});
 		setCreatePost(false);
 		const form = document.getElementById('create-post-form');
@@ -80,6 +71,8 @@ const Subreddit = ({ username }) => {
 					{posts.map((post, i) => {
 						return (
 							<Post
+								signedIn={signedIn}
+								time={post.timestamp}
 								name={post.name}
 								score={post.score}
 								title={post.title}
@@ -139,7 +132,6 @@ const Subreddit = ({ username }) => {
 					</div>
 				</form>
 			) : null}
-			{console.log(posts)}
 		</div>
 	);
 };

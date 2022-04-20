@@ -7,46 +7,67 @@ import {
 	getDocs,
 	onSnapshot,
 	QuerySnapshot,
+	serverTimestamp,
+	addDoc,
+	orderBy,
 } from '@firebase/firestore';
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router';
 import Post from './Post';
 
-const Subreddit = (props) => {
+const Subreddit = () => {
 	const [posts, setPosts] = useState([]);
 	const [createPost, setCreatePost] = useState(false);
+	const [title, setTitle] = useState('');
+	const [text, setText] = useState('');
 	const { subreddit } = useParams();
 
 	useEffect(() => {
 		grabPostsFromFirebase();
-	}, [subreddit]);
+	}, [subreddit, posts]);
 
 	const grabPostsFromFirebase = async () => {
 		let postsArr = [];
 		const firestore = getFirestore();
 		const collectionRef = collection(firestore, `Subreddit/${subreddit}/posts`);
-		const q = query(collectionRef);
-		// const querySnapshot = await getDocs(q);
-		// querySnapshot.forEach((doc) => {
-		// 	postsArr.push(doc.data());
-		// });
-		// setPosts(postsArr);
-
-		const unsub = onSnapshot(q, (QuerySnapshot) => {
-			QuerySnapshot.forEach((doc) => {
-				postsArr.push(doc.data());
-			});
-			setPosts(postsArr);
+		// sorts by newest on bottom first, oldest on top
+		const q = query(collectionRef, orderBy('timestamp', 'asc'));
+		const querySnapshot = await getDocs(q);
+		querySnapshot.forEach((doc) => {
+			postsArr.push(doc.data());
 		});
+		setPosts(postsArr);
+
+		// const unsub = onSnapshot(q, (QuerySnapshot) => {
+		// 	QuerySnapshot.forEach((doc) => {
+		// 		postsArr.push(doc.data());
+		// 	});
+		// 	setPosts(postsArr);
+		// });
 	};
 
-	const addPosts = async () => {
+	const titleHandler = (e) => {
+		const { value } = e.target;
+		setTitle(value);
+	};
+
+	const textHandler = (e) => {
+		const { value } = e.target;
+		setText(value);
+	};
+
+	const addPosts = async (e) => {
+		e.preventDefault();
 		const firestore = getFirestore();
-		await setDoc(doc(firestore, `Subreddit/${subreddit}`), {
-			title: 'title',
+		await addDoc(collection(firestore, `Subreddit/${subreddit}/posts`), {
 			score: 1,
-			text: 'text',
+			title: title,
+			text: text,
+			timestamp: serverTimestamp(),
 		});
+		setCreatePost(false);
+		const form = document.getElementById('create-post-form');
+		form.reset();
 	};
 
 	return (
@@ -85,9 +106,20 @@ const Subreddit = (props) => {
 					<fieldset>
 						<legend>New Post</legend>
 						<label htmlFor="title">Title: </label>
-						<input type="text" name="title" id="title" />
+						<input
+							type="text"
+							name="title"
+							id="title"
+							onChange={(e) => titleHandler(e)}
+						/>
 						<label htmlFor="text">Text: </label>
-						<textarea id="text" name="text" rows="4" cols="50" />
+						<textarea
+							id="text"
+							name="text"
+							rows="4"
+							cols="50"
+							onChange={(e) => textHandler(e)}
+						/>
 					</fieldset>
 					<div className="submit-wrapper">
 						<button
@@ -98,13 +130,16 @@ const Subreddit = (props) => {
 						>
 							Close
 						</button>
-						<button type="submit" className="new-post-submit">
+						<button
+							type="submit"
+							className="new-post-submit"
+							onClick={(e) => addPosts(e)}
+						>
 							Submit
 						</button>
 					</div>
 				</form>
 			) : null}
-			{console.log(posts)}
 		</div>
 	);
 };

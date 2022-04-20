@@ -11,4 +11,4 @@ root.render(
 	</React.StrictMode>
 );
 
-initializeApp(firebaseConfig);
+const app = initializeApp(firebaseConfig);

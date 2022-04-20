@@ -53,6 +53,17 @@ header ul {
   width: 50px;
 }
 
+.google-username span {
+  font-size: larger;
+  font-weight: bold;
+}
+
+.signout {
+  width: 100px;
+  height: 25px;
+  float: right;
+}
+
 .subreddit-list-wrapper {
   display: flex;
   flex-direction: column;
@@ -77,10 +88,6 @@ header ul {
   align-items: center;
 }
 
-.post-title {
-  padding-left: 1rem;
-}
-
 .post-score {
   font-size: larger;
   text-align: center;
@@ -99,6 +106,17 @@ header ul {
 .score-wrapper {
   display: flex;
   gap: .5rem;
+}
+
+.posts-wrapper {
+  display: flex;
+  flex-direction: column;
+  padding-left: 1rem;
+  gap: 1rem;
+}
+
+.post-comments {
+  font-size: smaller;
 }
 
 .add-post {
@@ -133,7 +151,8 @@ fieldset {
   gap: .15rem;
 }
 
-.new-post-submit, .close-form {
+.new-post-submit,
+.close-form {
   width: 100px;
 }
 

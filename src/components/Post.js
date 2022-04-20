@@ -4,7 +4,7 @@ import { useParams } from 'react-router';
 import up from '../images/arrow-single-up.svg';
 import down from '../images/arrow-single-down.svg';
 
-const Post = ({ score, title, text, index }) => {
+const Post = ({ score, title, index }) => {
 	const { subreddit } = useParams();
 
 	return (
@@ -17,9 +17,12 @@ const Post = ({ score, title, text, index }) => {
 					<img src={down} alt="downvote arrow" />
 				</div>
 			</div>
-			<Link to={`/r/${subreddit}/${title}`}>
-				<div className="post-title">{title}</div>
-			</Link>
+			<div className="posts-wrapper">
+				<Link to={`/r/${subreddit}/${title}`}>
+					<div className="post-title">{title}</div>
+				</Link>
+				<div className="post-comments">Comments</div>
+			</div>
 		</li>
 	);
 };

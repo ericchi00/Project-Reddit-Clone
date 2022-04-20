@@ -4,4 +4,4 @@ Create a clone of a social media site for my final project to show off all of my
 
 ## Technologies
 
-HTML, CSS, Javascript, React, Jest, Firebase
+HTML, CSS, Javascript, React, Firebase, Date-FNS(time formatting)

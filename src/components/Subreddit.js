@@ -2,11 +2,7 @@ import {
 	collection,
 	getFirestore,
 	query,
-	setDoc,
-	doc,
 	getDocs,
-	onSnapshot,
-	QuerySnapshot,
 	serverTimestamp,
 	addDoc,
 	orderBy,
@@ -15,7 +11,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router';
 import Post from './Post';
 
-const Subreddit = () => {
+const Subreddit = ({ username }) => {
 	const [posts, setPosts] = useState([]);
 	const [createPost, setCreatePost] = useState(false);
 	const [title, setTitle] = useState('');
@@ -61,6 +57,7 @@ const Subreddit = () => {
 		e.preventDefault();
 		const firestore = getFirestore();
 		await addDoc(collection(firestore, `Subreddit/${subreddit}/posts`), {
+			name: username,
 			score: 1,
 			title: title,
 			text: text,
@@ -83,6 +80,7 @@ const Subreddit = () => {
 					{posts.map((post, i) => {
 						return (
 							<Post
+								name={post.name}
 								score={post.score}
 								title={post.title}
 								text={post.text}

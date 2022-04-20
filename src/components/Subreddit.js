@@ -24,7 +24,8 @@ const Subreddit = () => {
 
 	useEffect(() => {
 		grabPostsFromFirebase();
-	}, [subreddit, posts]);
+		console.log('read');
+	}, [subreddit, createPost]);
 
 	const grabPostsFromFirebase = async () => {
 		let postsArr = [];
@@ -140,6 +141,7 @@ const Subreddit = () => {
 					</div>
 				</form>
 			) : null}
+			{console.log(posts)}
 		</div>
 	);
 };

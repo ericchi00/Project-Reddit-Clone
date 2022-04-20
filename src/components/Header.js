@@ -1,56 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import {
-	getAuth,
-	GoogleAuthProvider,
-	signInWithPopup,
-	onAuthStateChanged,
-	signOut,
-} from 'firebase/auth';
 import bot from '../images/bot.svg';
 
-const Header = () => {
-	const [signedIn, setSignedIn] = useState(false);
-	const [username, setUserName] = useState('');
-	const provider = new GoogleAuthProvider();
-	const auth = getAuth();
-
-	useEffect(() => {
-		onAuthStateChanged(auth, (user) => {
-			if (user) {
-				setUserName(user.displayName);
-				setSignedIn(true);
-			} else {
-				return;
-			}
-		});
-	});
-
-	const login = () => {
-		signInWithPopup(auth, provider)
-			.then((result) => {
-				const credential = GoogleAuthProvider.credentialFromResult(result);
-				const token = credential.accessToken;
-				const user = result.user;
-			})
-			.catch((error) => {
-				const errorCode = error.code;
-				const errorMessage = error.message;
-				const email = error.email;
-				const credential = GoogleAuthProvider.credentialFromError(error);
-				console.log(errorCode, errorMessage, email, credential);
-			});
-	};
-
-	const signout = () => {
-		signOut(auth)
-			.then(() => {
-				setSignedIn(false);
-			})
-			.catch((error) => {
-				alert(error, 'Please try again!');
-			});
-	};
-
+const Header = ({ username, signedIn, login, signout }) => {
 	return (
 		<header>
 			<nav>

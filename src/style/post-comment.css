@@ -11,8 +11,12 @@
 }
 
 .post-comment-wrapper .post-submitter {
-    padding-top: .5rem;
+    padding-top: .3rem;
     font-size: small;
+}
+
+.up-down img {
+    cursor: pointer;
 }
 
 .posts-wrapper {
@@ -21,7 +25,8 @@
 }
 
 .post-text {
-    margin-top: 1rem;
+    margin-top: .3rem;
+    margin-bottom: .3rem;
     padding: .5rem;
     border: 1px black solid;
     width: 100%;
@@ -35,4 +40,15 @@
 
 .up-down img {
     width: 20px;
+}
+
+#comment-form {
+    display: flex;
+    flex-direction: column;
+    max-width: fit-content;
+}
+
+#comment-form button {
+    width: 150px;
+    margin-left: auto;
 }

@@ -84,7 +84,7 @@ header ul {
   grid-column: 2/3;
 }
 
-.create-subreddit-form{
+.create-subreddit-form {
   display: flex;
   flex-direction: column;
 }
@@ -103,6 +103,11 @@ header ul {
   display: flex;
   gap: 1rem;
   align-items: center;
+  width: fit-content;
+}
+
+.post-title {
+  width: fit-content;
 }
 
 .post-score {
@@ -129,10 +134,12 @@ header ul {
   display: flex;
   flex-direction: column;
   padding-left: 1rem;
+  width: auto;
 }
 
 .post-comments {
   font-size: smaller;
+  width: fit-content;
 }
 
 .add-post {

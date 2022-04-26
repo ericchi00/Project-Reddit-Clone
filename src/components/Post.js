@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import { Link } from 'react-router-dom';
 import { useParams } from 'react-router';
@@ -21,6 +21,11 @@ const Post = ({ score, title, index, name, time, signedIn }) => {
 	const { subreddit } = useParams();
 	const firestore = getFirestore();
 	const [updatedScore, setUpdatedScore] = useState(score);
+
+	useEffect(() => {
+		// updates posts score after clicking on a different subreddit
+		setUpdatedScore(score);
+	}, [score]);
 
 	const upVote = async () => {
 		if (!signedIn) return;
@@ -127,14 +132,21 @@ const Post = ({ score, title, index, name, time, signedIn }) => {
 				</div>
 			</div>
 			<div className="posts-wrapper">
-				<Link to={`/r/${subreddit}/${title}`}>
-					<div className="post-title">{title}</div>
-				</Link>
+				<div className="post-title">
+					<Link to={`/r/${subreddit}/${title}`}>
+						<p>{title}</p>
+					</Link>
+				</div>
 				<div className="post-submitter">
 					Submitted by {name}{' '}
 					{formatDistanceToNow(time, { includeSeconds: true })} ago
 				</div>
-				<div className="post-comments">Comments</div>
+
+				<div className="post-comments">
+					<Link to={`/r/${subreddit}/${title}`}>
+						<p>Comments</p>
+					</Link>
+				</div>
 			</div>
 		</li>
 	);

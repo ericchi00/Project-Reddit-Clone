@@ -1,0 +1,38 @@
+.post-comment {
+    padding: 2rem;
+    grid-row: 2/3;
+}
+
+.post-comment-wrapper {
+    display: flex;
+    padding: 1rem;
+    gap: 1rem;
+    width: 100%;
+}
+
+.post-comment-wrapper .post-submitter {
+    padding-top: .5rem;
+    font-size: small;
+}
+
+.posts-wrapper {
+    display: flex;
+    flex: 1;
+}
+
+.post-text {
+    margin-top: 1rem;
+    padding: .5rem;
+    border: 1px black solid;
+    width: 100%;
+    border-radius: 10px;
+}
+
+.up-down {
+    display: flex;
+    flex-direction: column;
+}
+
+.up-down img {
+    width: 20px;
+}

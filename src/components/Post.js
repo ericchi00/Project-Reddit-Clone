@@ -17,7 +17,7 @@ import {
 	getDoc,
 } from '@firebase/firestore';
 
-const Post = ({ score, title, index, name, time, signedIn }) => {
+const Post = ({ score, title, index, name, time, signedIn, docID }) => {
 	const { subreddit } = useParams();
 	const firestore = getFirestore();
 	const [updatedScore, setUpdatedScore] = useState(score);
@@ -133,7 +133,7 @@ const Post = ({ score, title, index, name, time, signedIn }) => {
 			</div>
 			<div className="posts-wrapper">
 				<div className="post-title">
-					<Link to={`/r/${subreddit}/${title}`}>
+					<Link to={`/r/${subreddit}/${docID}`}>
 						<p>{title}</p>
 					</Link>
 				</div>

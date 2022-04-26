@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import { Link } from 'react-router-dom';
 import bot from '../images/bot.svg';
 
 const Header = ({ username, signedIn, login, signout }) => {
@@ -8,8 +9,12 @@ const Header = ({ username, signedIn, login, signout }) => {
 				<ul>
 					<div className="left-header">
 						<li className="logo">
-							<img src={bot} alt="Bot Logo" />
-							<p>reddit</p>
+							<Link to="/">
+								<img src={bot} alt="Bot Logo" />
+							</Link>
+							<Link to="/">
+								<p>reddit</p>
+							</Link>
 						</li>
 						<li className="link-header">Hot</li>
 						<li className="link-header">New</li>

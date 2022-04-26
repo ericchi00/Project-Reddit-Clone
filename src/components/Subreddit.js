@@ -29,7 +29,7 @@ const Subreddit = ({ username, signedIn }) => {
 		const q = query(collectionRef, orderBy('timestamp', 'asc'));
 		const querySnapshot = await getDocs(q);
 		querySnapshot.forEach((doc) => {
-			postsArr.push(doc.data());
+			postsArr.push({ data: doc.data(), id: doc.id });
 		});
 		setPosts(postsArr);
 	};
@@ -46,11 +46,13 @@ const Subreddit = ({ username, signedIn }) => {
 
 	const addPosts = async (e) => {
 		e.preventDefault();
+		if (!signedIn) return;
+		if (title.length <= 0 && text.length <= 0) return;
 		const firestore = getFirestore();
 		await addDoc(collection(firestore, `Subreddit/${subreddit}/posts`), {
+			title: title,
 			name: username,
 			score: 1,
-			title: title,
 			text: text,
 			timestamp: Date.now(),
 		});
@@ -63,7 +65,7 @@ const Subreddit = ({ username, signedIn }) => {
 		<div className="subreddit">
 			<h2>r/{subreddit}</h2>
 			{posts.length <= 0 ? (
-				<div className="subreddit=empty">
+				<div className="subreddit-empty">
 					Subreddit is empty. Make the first post!
 				</div>
 			) : (
@@ -72,11 +74,12 @@ const Subreddit = ({ username, signedIn }) => {
 						return (
 							<Post
 								signedIn={signedIn}
-								time={post.timestamp}
-								name={post.name}
-								score={post.score}
-								title={post.title}
-								text={post.text}
+								time={post.data.timestamp}
+								name={post.data.name}
+								score={post.data.score}
+								title={post.data.title}
+								text={post.data.text}
+								docID={post.id}
 								key={i}
 								index={i + 1}
 							/>
@@ -97,20 +100,22 @@ const Subreddit = ({ username, signedIn }) => {
 				<form id="create-post-form">
 					<fieldset>
 						<legend>New Post</legend>
-						<label htmlFor="title">Title: </label>
+						<label htmlFor="title">Title*: </label>
 						<input
 							type="text"
 							name="title"
 							id="title"
 							onChange={(e) => titleHandler(e)}
+							required
 						/>
-						<label htmlFor="text">Text: </label>
+						<label htmlFor="text">Text*: </label>
 						<textarea
 							id="text"
 							name="text"
 							rows="4"
 							cols="50"
 							onChange={(e) => textHandler(e)}
+							required
 						/>
 					</fieldset>
 					<div className="submit-wrapper">
@@ -132,7 +137,6 @@ const Subreddit = ({ username, signedIn }) => {
 					</div>
 				</form>
 			) : null}
-			{console.log(posts)}
 		</div>
 	);
 };

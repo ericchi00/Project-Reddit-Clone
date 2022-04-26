@@ -73,7 +73,10 @@ const App = () => {
 					path="/r/:subreddit"
 					element={<Subreddit username={username} signedIn={signedIn} />}
 				/>
-				<Route path="/r/:subreddit/:postTitle" element={<Comment />} />
+				<Route
+					path="/r/:subreddit/:postID"
+					element={<Comment username={username} signedIn={signedIn} />}
+				/>
 			</Routes>
 		</BrowserRouter>
 	);

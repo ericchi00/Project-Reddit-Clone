@@ -132,6 +132,7 @@ const Subreddit = ({ username, signedIn }) => {
 					</div>
 				</form>
 			) : null}
+			{console.log(posts)}
 		</div>
 	);
 };

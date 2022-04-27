@@ -38,7 +38,6 @@ const Thread = ({ currentUser, signedIn }) => {
 	useEffect(() => {
 		grabPostData();
 		grabComments();
-		console.log('reading data');
 	}, [newComment]);
 
 	const commentHandler = (e) => {
@@ -254,6 +253,8 @@ const Thread = ({ currentUser, signedIn }) => {
 					{comments.map((comment, i) => {
 						return (
 							<Comment
+								postID={postID}
+								subreddit={subreddit}
 								currentUser={currentUser}
 								signedIn={signedIn}
 								key={i}

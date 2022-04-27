@@ -39,7 +39,7 @@ const Subreddit = ({ currentUser, signedIn }) => {
 				postsArr.push({ data: doc.data(), id: doc.id });
 			});
 		} else if (expr === 'new') {
-			const q = query(collectionRef, orderBy('timestamp'));
+			const q = query(collectionRef, orderBy('timestamp', 'desc'));
 			const querySnapshot = await getDocs(q);
 			querySnapshot.forEach((doc) => {
 				postsArr.push({ data: doc.data(), id: doc.id });

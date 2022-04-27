@@ -34,7 +34,6 @@ const Post = ({
 	useEffect(() => {
 		// updates posts score after clicking on a different subreddit
 		setUpdatedScore(score);
-		console.log('reading data');
 	}, [score]);
 
 	const upVote = async () => {
@@ -157,7 +156,7 @@ const Post = ({
 				</div>
 
 				<div className="post-comments">
-					<Link to={`/r/${subreddit}/${title}`}>
+					<Link to={`/r/${subreddit}/${docID}`}>
 						<p>Comments</p>
 					</Link>
 				</div>

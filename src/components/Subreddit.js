@@ -20,7 +20,7 @@ const Subreddit = ({ username, signedIn }) => {
 	const { subreddit } = useParams();
 
 	useEffect(() => {
-		if (hot === true) {
+		if (hot) {
 			grabPostsFromFirebase('hot');
 		} else {
 			grabPostsFromFirebase('new');
@@ -60,7 +60,10 @@ const Subreddit = ({ username, signedIn }) => {
 
 	const addPosts = async (e) => {
 		e.preventDefault();
-		if (!signedIn) return;
+		if (!signedIn) {
+			alert('You must be signed in to create a post.');
+			return;
+		}
 		if (title.length <= 0 && text.length <= 0) return;
 		const firestore = getFirestore();
 		await addDoc(collection(firestore, `Subreddit/${subreddit}/posts`), {
@@ -101,6 +104,7 @@ const Subreddit = ({ username, signedIn }) => {
 					{posts.map((post, i) => {
 						return (
 							<Post
+								currentUser={username}
 								signedIn={signedIn}
 								time={post.data.timestamp}
 								name={post.data.name}

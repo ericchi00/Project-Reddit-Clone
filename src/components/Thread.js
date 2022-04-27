@@ -25,6 +25,7 @@ const Thread = ({ username, signedIn }) => {
 	const { subreddit, postID } = useParams();
 	const firestore = getFirestore();
 	const [comments, setComments] = useState([]);
+	const [newComment, setNewComment] = useState(false);
 	const [score, setPostScore] = useState(null);
 	const [title, setPostTitle] = useState(null);
 	const [text, setPostText] = useState(null);
@@ -37,7 +38,7 @@ const Thread = ({ username, signedIn }) => {
 		grabPostData();
 		grabComments();
 		console.log('reading data');
-	}, []);
+	}, [newComment]);
 
 	const commentHandler = (e) => {
 		const { value } = e.target;
@@ -78,7 +79,10 @@ const Thread = ({ username, signedIn }) => {
 	};
 
 	const upVote = async () => {
-		if (!signedIn) return;
+		if (!signedIn) {
+			alert('You must be signed in to vote.');
+			return;
+		}
 
 		const docRef = doc(firestore, 'UserLikes', name);
 		const docSnap = await getDoc(docRef);
@@ -125,7 +129,10 @@ const Thread = ({ username, signedIn }) => {
 	};
 
 	const downVote = async () => {
-		if (!signedIn) return;
+		if (!signedIn) {
+			alert('You must be signed in to vote.');
+			return;
+		}
 
 		const docRef = doc(firestore, 'UserLikes', name);
 		const docSnap = await getDoc(docRef);
@@ -173,6 +180,15 @@ const Thread = ({ username, signedIn }) => {
 
 	const submitComment = async (e) => {
 		e.preventDefault();
+		if (!signedIn) {
+			alert('You must be signed in to comment.');
+			return;
+		}
+		if (commentText <= 1) {
+			const comment = document.getElementById('comment');
+			comment.placeholder = 'Comment needs be longer than 1 character.';
+			return;
+		}
 		await addDoc(
 			collection(
 				firestore,
@@ -191,6 +207,7 @@ const Thread = ({ username, signedIn }) => {
 		);
 		const form = document.getElementById('comment-form');
 		form.reset();
+		setNewComment(true);
 	};
 
 	return (

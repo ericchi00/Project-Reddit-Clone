@@ -10,7 +10,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router';
 import Post from './Post';
 
-const Subreddit = ({ username, signedIn }) => {
+const Subreddit = ({ currentUser, signedIn }) => {
 	const [posts, setPosts] = useState([]);
 	const [createPost, setCreatePost] = useState(false);
 	const [title, setTitle] = useState('');
@@ -68,7 +68,7 @@ const Subreddit = ({ username, signedIn }) => {
 		const firestore = getFirestore();
 		await addDoc(collection(firestore, `Subreddit/${subreddit}/posts`), {
 			title: title,
-			name: username,
+			name: currentUser,
 			score: 1,
 			text: text,
 			timestamp: Date.now(),
@@ -104,7 +104,7 @@ const Subreddit = ({ username, signedIn }) => {
 					{posts.map((post, i) => {
 						return (
 							<Post
-								currentUser={username}
+								currentUser={currentUser}
 								signedIn={signedIn}
 								time={post.data.timestamp}
 								name={post.data.name}

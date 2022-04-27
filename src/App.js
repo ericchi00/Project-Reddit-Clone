@@ -71,11 +71,11 @@ const App = () => {
 				<Route path="/" element={<Homepage />} />
 				<Route
 					path="/r/:subreddit"
-					element={<Subreddit username={username} signedIn={signedIn} />}
+					element={<Subreddit currentUser={username} signedIn={signedIn} />}
 				/>
 				<Route
 					path="/r/:subreddit/:postID"
-					element={<Thread username={username} signedIn={signedIn} />}
+					element={<Thread currentUser={username} signedIn={signedIn} />}
 				/>
 			</Routes>
 		</BrowserRouter>

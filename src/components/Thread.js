@@ -21,7 +21,7 @@ import '../style/post-comment.css';
 import { formatDistanceToNow } from 'date-fns';
 import Comment from './Comment';
 
-const Thread = ({ username, signedIn }) => {
+const Thread = ({ currentUser, signedIn }) => {
 	const { subreddit, postID } = useParams();
 	const firestore = getFirestore();
 	const [comments, setComments] = useState([]);
@@ -37,7 +37,6 @@ const Thread = ({ username, signedIn }) => {
 	useEffect(() => {
 		grabPostData();
 		grabComments();
-		console.log('reading data');
 	}, [newComment]);
 
 	const commentHandler = (e) => {
@@ -84,7 +83,7 @@ const Thread = ({ username, signedIn }) => {
 			return;
 		}
 
-		const docRef = doc(firestore, 'UserLikes', name);
+		const docRef = doc(firestore, 'UserLikes', currentUser);
 		const docSnap = await getDoc(docRef);
 		const upvote = docSnap.data().upvotes;
 
@@ -199,7 +198,7 @@ const Thread = ({ username, signedIn }) => {
 				'comments'
 			),
 			{
-				name: username,
+				name: currentUser,
 				score: 1,
 				text: commentText,
 				timestamp: Date.now(),
@@ -259,6 +258,8 @@ const Thread = ({ username, signedIn }) => {
 					{comments.map((comment, i) => {
 						return (
 							<Comment
+								currentUser={currentUser}
+								signedIn={signedIn}
 								key={i}
 								name={comment.name}
 								score={comment.score}

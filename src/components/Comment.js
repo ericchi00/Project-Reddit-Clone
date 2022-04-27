@@ -13,8 +13,6 @@ import {
 	arrayUnion,
 	increment,
 	getDoc,
-	addDoc,
-	orderBy,
 } from '@firebase/firestore';
 
 const Comment = ({

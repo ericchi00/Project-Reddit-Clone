@@ -16,8 +16,6 @@ const Header = ({ username, signedIn, login, signout }) => {
 								<p>reddit</p>
 							</Link>
 						</li>
-						<li className="link-header">Hot</li>
-						<li className="link-header">New</li>
 					</div>
 					{!signedIn ? (
 						<div className="google-wrapper">

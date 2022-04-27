@@ -36,6 +36,14 @@
 .up-down {
     display: flex;
     flex-direction: column;
+    justify-content: center;
+}
+
+.comments-upvote {
+    padding: .3rem;
+    display: flex;
+    flex-direction: column;
+    gap: .3rem;
 }
 
 .up-down img {
@@ -51,4 +59,34 @@
 #comment-form button {
     width: 150px;
     margin-left: auto;
+}
+
+.comments {
+    margin-top: 1rem;
+    padding: .3rem;
+    display: flex;
+    flex-direction: column;
+    gap: .3rem;
+}
+
+.comment {
+    display: flex;
+    border: 1px black solid;
+}
+
+.comments img {
+    width: 15px;
+}
+
+.comment-info {
+    padding: .3rem;
+    display: flex;
+    gap: .3rem;
+    font-size: smaller;
+}
+
+.comment-submitter,
+.comment-score,
+.comment-time {
+    height: fit-content;
 }

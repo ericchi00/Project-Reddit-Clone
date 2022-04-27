@@ -133,7 +133,6 @@ header ul {
 .posts-wrapper {
   display: flex;
   flex-direction: column;
-  padding-left: 1rem;
   width: auto;
 }
 
@@ -189,4 +188,13 @@ button:hover {
 
 .downvote-clicked {
   opacity: .3;
+}
+
+.hot-new {
+  display: flex;
+  gap: 1rem;
+}
+
+.hot-new button {
+  width: 75px;
 }

@@ -35,17 +35,24 @@ const Thread = ({ currentUser, signedIn }) => {
 	const [commentText, setCommentText] = useState('');
 	const [updatedScore, setUpdatedScore] = useState(score);
 
+	const [hot, setHot] = useState(true);
+	const [newest, setNewest] = useState(false);
+
 	useEffect(() => {
 		grabPostData();
-		grabComments();
-	}, [newComment]);
+		if (hot) {
+			grabComments('hot');
+		} else {
+			grabComments('new');
+		}
+	}, [newComment, newest]);
 
 	const commentHandler = (e) => {
 		const { value } = e.target;
 		setCommentText(value);
 	};
 
-	const grabComments = async () => {
+	const grabComments = async (expr) => {
 		let commentsArr = [];
 		const firestore = getFirestore();
 		const collectionRef = collection(
@@ -54,11 +61,19 @@ const Thread = ({ currentUser, signedIn }) => {
 			`${postID}`,
 			`comments`
 		);
-		const q = query(collectionRef, orderBy('timestamp', 'asc'));
-		const querySnapshot = await getDocs(q);
-		querySnapshot.forEach((doc) => {
-			commentsArr.push(doc.data());
-		});
+		if (expr === 'hot') {
+			const q = query(collectionRef, orderBy('score', 'desc'));
+			const querySnapshot = await getDocs(q);
+			querySnapshot.forEach((doc) => {
+				commentsArr.push(doc.data());
+			});
+		} else if (expr === 'new') {
+			const q = query(collectionRef, orderBy('timestamp', 'desc'));
+			const querySnapshot = await getDocs(q);
+			querySnapshot.forEach((doc) => {
+				commentsArr.push(doc.data());
+			});
+		}
 		setComments(commentsArr);
 	};
 
@@ -209,6 +224,16 @@ const Thread = ({ currentUser, signedIn }) => {
 		setNewComment(true);
 	};
 
+	const hotHandler = () => {
+		setHot(true);
+		setNewest(false);
+	};
+
+	const newHandler = () => {
+		setNewest(true);
+		setHot(false);
+	};
+
 	return (
 		<div className="post-comment">
 			<Link to={`/r/${subreddit}`}>
@@ -250,6 +275,14 @@ const Thread = ({ currentUser, signedIn }) => {
 				</div>
 			) : (
 				<div className="comments">
+					<div className="comment-sort">
+						<button type="button" onClick={() => hotHandler()}>
+							Hot
+						</button>
+						<button type="button" onClick={() => newHandler()}>
+							New
+						</button>
+					</div>
 					{comments.map((comment, i) => {
 						return (
 							<Comment

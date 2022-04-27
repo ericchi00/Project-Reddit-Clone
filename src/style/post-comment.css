@@ -72,6 +72,7 @@
 .comment {
     display: flex;
     border: 1px black solid;
+    border-radius: 10px;
 }
 
 .comments img {
@@ -91,6 +92,10 @@
     height: fit-content;
 }
 
-.comment-text{
+.comment-text {
     padding-bottom: 1rem;
+}
+
+.comment-sort button {
+    width: 50px;
 }

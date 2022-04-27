@@ -4,6 +4,7 @@ import down from '../images/arrow-single-down.svg';
 import { formatDistanceToNow } from 'date-fns';
 
 const Comment = ({ name, score, text, time }) => {
+	
 	return (
 		<div className="comment">
 			<div className="comments-upvote">
@@ -18,7 +19,7 @@ const Comment = ({ name, score, text, time }) => {
 						{formatDistanceToNow(time, { includeSeconds: true })} ago
 					</div>
 				</div>
-				<span className="comment-text">{text}</span>
+				<div className="comment-text">{text}</div>
 			</div>
 		</div>
 	);

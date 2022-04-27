@@ -107,7 +107,11 @@ header ul {
 }
 
 .post-title {
-  width: fit-content;
+  display: flex;
+}
+
+.thread-title {
+  display: flex;
 }
 
 .post-score {
@@ -133,12 +137,11 @@ header ul {
 .posts-wrapper {
   display: flex;
   flex-direction: column;
-  width: auto;
 }
 
 .post-comments {
   font-size: smaller;
-  width: fit-content;
+  display: flex;
 }
 
 .add-post {
@@ -197,4 +200,12 @@ button:hover {
 
 .hot-new button {
   width: 75px;
+}
+
+img {
+  cursor: pointer;
+}
+
+.post-comment h2 {
+  display: inline;
 }

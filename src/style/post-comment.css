@@ -90,3 +90,7 @@
 .comment-time {
     height: fit-content;
 }
+
+.comment-text{
+    padding-bottom: 1rem;
+}

@@ -17,7 +17,16 @@ import {
 	getDoc,
 } from '@firebase/firestore';
 
-const Post = ({ score, title, index, name, time, signedIn, docID }) => {
+const Post = ({
+	score,
+	title,
+	index,
+	name,
+	time,
+	signedIn,
+	docID,
+	currentUser,
+}) => {
 	const { subreddit } = useParams();
 	const firestore = getFirestore();
 	const [updatedScore, setUpdatedScore] = useState(score);
@@ -25,12 +34,16 @@ const Post = ({ score, title, index, name, time, signedIn, docID }) => {
 	useEffect(() => {
 		// updates posts score after clicking on a different subreddit
 		setUpdatedScore(score);
+		console.log('reading data');
 	}, [score]);
 
 	const upVote = async () => {
-		if (!signedIn) return;
+		if (!signedIn) {
+			alert('You must be signed in to vote.');
+			return;
+		}
 
-		const docRef = doc(firestore, 'UserLikes', name);
+		const docRef = doc(firestore, 'UserLikes', currentUser);
 		const docSnap = await getDoc(docRef);
 		const upvote = docSnap.data().upvotes;
 
@@ -41,17 +54,17 @@ const Post = ({ score, title, index, name, time, signedIn, docID }) => {
 			// searches if user already upvoted & removes it
 			if (upvote.length > 0) {
 				const originalVote = upvote.filter((item) => item === time);
-				if (originalVote[0] === time) {
+				if (item.data().timestamp === originalVote[0]) {
 					await updateDoc(
 						doc(firestore, `Subreddit/${subreddit}/posts/${item.id}`),
 						{
 							score: increment(-1),
 						}
 					);
-					await updateDoc(doc(firestore, `UserLikes/${name}`), {
+					await updateDoc(doc(firestore, `UserLikes/${currentUser}`), {
 						upvotes: arrayRemove(time),
 					});
-					setUpdatedScore(score);
+					setUpdatedScore(item.data().score - 1);
 					return;
 				}
 			}
@@ -64,20 +77,22 @@ const Post = ({ score, title, index, name, time, signedIn, docID }) => {
 						score: increment(1),
 					}
 				);
-				await updateDoc(doc(firestore, `UserLikes/${name}`), {
+				await updateDoc(doc(firestore, `UserLikes/${currentUser}`), {
 					upvotes: arrayUnion(time),
 					downvotes: arrayRemove(time),
 				});
+				setUpdatedScore(item.data().score + 1);
 			}
-			const newScore = item.data().score + 1;
-			setUpdatedScore(newScore);
 		});
 	};
 
 	const downVote = async () => {
-		if (!signedIn) return;
+		if (!signedIn) {
+			alert('You must be signed in to vote.');
+			return;
+		}
 
-		const docRef = doc(firestore, 'UserLikes', name);
+		const docRef = doc(firestore, 'UserLikes', currentUser);
 		const docSnap = await getDoc(docRef);
 		const downvote = docSnap.data().downvotes;
 
@@ -88,17 +103,17 @@ const Post = ({ score, title, index, name, time, signedIn, docID }) => {
 			// searches if user already downvoted & removes it
 			if (downvote.length > 0) {
 				const originalVote = downvote.filter((item) => item === time);
-				if (originalVote[0] === time) {
+				if (item.data().timestamp === originalVote[0]) {
 					await updateDoc(
 						doc(firestore, `Subreddit/${subreddit}/posts/${item.id}`),
 						{
 							score: increment(1),
 						}
 					);
-					await updateDoc(doc(firestore, `UserLikes/${name}`), {
+					await updateDoc(doc(firestore, `UserLikes/${currentUser}`), {
 						downvotes: arrayRemove(time),
 					});
-					setUpdatedScore(score);
+					setUpdatedScore(item.data().score);
 					return;
 				}
 			}
@@ -111,13 +126,12 @@ const Post = ({ score, title, index, name, time, signedIn, docID }) => {
 						score: increment(-1),
 					}
 				);
-				await updateDoc(doc(firestore, `UserLikes/${name}`), {
+				await updateDoc(doc(firestore, `UserLikes/${currentUser}`), {
 					upvotes: arrayRemove(time),
 					downvotes: arrayUnion(time),
 				});
+				setUpdatedScore(item.data().score);
 			}
-			const newScore = item.data().score - 1;
-			setUpdatedScore(newScore);
 		});
 	};
 

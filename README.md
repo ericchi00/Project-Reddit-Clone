@@ -9,7 +9,11 @@ HTML, CSS, Javascript, React, Firebase, Date-FNS(time formatting)
 ## Features
 
 Create Subreddits
+
 Create posts in individual subreddits
+
 Sort Subreddit posts by Hot(score) or New
-Upvote/Downvote posts & comments 
+
+Upvote/Downvote posts & comments
+
 Login using Google's authentication

@@ -112,7 +112,7 @@ const Post = ({
 					await updateDoc(doc(firestore, `UserLikes/${currentUser}`), {
 						downvotes: arrayRemove(time),
 					});
-					setUpdatedScore(item.data().score);
+					setUpdatedScore(item.data().score + 1);
 					return;
 				}
 			}
@@ -129,7 +129,7 @@ const Post = ({
 					upvotes: arrayRemove(time),
 					downvotes: arrayUnion(time),
 				});
-				setUpdatedScore(item.data().score);
+				setUpdatedScore(item.data().score - 1);
 			}
 		});
 	};

@@ -33,10 +33,12 @@ const Thread = ({ currentUser, signedIn }) => {
 	const [time, setPostTime] = useState(0);
 
 	const [commentText, setCommentText] = useState('');
+	const [updatedScore, setUpdatedScore] = useState(score);
 
 	useEffect(() => {
 		grabPostData();
 		grabComments();
+		console.log('reading data');
 	}, [newComment]);
 
 	const commentHandler = (e) => {
@@ -73,6 +75,7 @@ const Thread = ({ currentUser, signedIn }) => {
 				setPostTitle(item.data().title);
 				setPostText(item.data().text);
 				setPostName(item.data().name);
+				setUpdatedScore(item.data().score);
 			}
 		});
 	};
@@ -94,17 +97,17 @@ const Thread = ({ currentUser, signedIn }) => {
 			// searches if user already upvoted & removes it
 			if (upvote.length > 0) {
 				const originalVote = upvote.filter((item) => item === time);
-				if (originalVote[0] === time) {
+				if (item.data().timestamp === originalVote[0]) {
 					await updateDoc(
 						doc(firestore, `Subreddit/${subreddit}/posts/${item.id}`),
 						{
 							score: increment(-1),
 						}
 					);
-					await updateDoc(doc(firestore, `UserLikes/${name}`), {
+					await updateDoc(doc(firestore, `UserLikes/${currentUser}`), {
 						upvotes: arrayRemove(time),
 					});
-					setPostScore(score);
+					setUpdatedScore(item.data().score - 1);
 					return;
 				}
 			}
@@ -117,13 +120,12 @@ const Thread = ({ currentUser, signedIn }) => {
 						score: increment(1),
 					}
 				);
-				await updateDoc(doc(firestore, `UserLikes/${name}`), {
+				await updateDoc(doc(firestore, `UserLikes/${currentUser}`), {
 					upvotes: arrayUnion(time),
 					downvotes: arrayRemove(time),
 				});
+				setUpdatedScore(item.data().score + 1);
 			}
-			const newScore = item.data().score + 1;
-			setPostScore(newScore);
 		});
 	};
 
@@ -133,7 +135,7 @@ const Thread = ({ currentUser, signedIn }) => {
 			return;
 		}
 
-		const docRef = doc(firestore, 'UserLikes', name);
+		const docRef = doc(firestore, 'UserLikes', currentUser);
 		const docSnap = await getDoc(docRef);
 		const downvote = docSnap.data().downvotes;
 
@@ -144,17 +146,17 @@ const Thread = ({ currentUser, signedIn }) => {
 			// searches if user already downvoted & removes it
 			if (downvote.length > 0) {
 				const originalVote = downvote.filter((item) => item === time);
-				if (originalVote[0] === time) {
+				if (item.data().timestamp === originalVote[0]) {
 					await updateDoc(
 						doc(firestore, `Subreddit/${subreddit}/posts/${item.id}`),
 						{
 							score: increment(1),
 						}
 					);
-					await updateDoc(doc(firestore, `UserLikes/${name}`), {
+					await updateDoc(doc(firestore, `UserLikes/${currentUser}`), {
 						downvotes: arrayRemove(time),
 					});
-					setPostScore(score);
+					setUpdatedScore(item.data().score + 1);
 					return;
 				}
 			}
@@ -167,13 +169,12 @@ const Thread = ({ currentUser, signedIn }) => {
 						score: increment(-1),
 					}
 				);
-				await updateDoc(doc(firestore, `UserLikes/${name}`), {
+				await updateDoc(doc(firestore, `UserLikes/${currentUser}`), {
 					upvotes: arrayRemove(time),
 					downvotes: arrayUnion(time),
 				});
+				setUpdatedScore(item.data().score - 1);
 			}
-			const newScore = item.data().score - 1;
-			setPostScore(newScore);
 		});
 	};
 
@@ -217,13 +218,11 @@ const Thread = ({ currentUser, signedIn }) => {
 			<div className="post-comment-wrapper">
 				<div className="up-down">
 					<img src={up} alt="upvote arrow" onClick={() => upVote()} />
-					<span className="post-score">{score}</span>
+					<span className="post-score">{updatedScore}</span>
 					<img src={down} alt="downvote arrow" onClick={() => downVote()} />
 				</div>
 				<div className="posts-wrapper">
-					<Link to={`/r/${subreddit}/${postID}`}>
-						<div className="post-title">{title}</div>
-					</Link>
+					<div className="thread-title">{title}</div>
 					<div className="post-submitter">
 						Submitted by {name}{' '}
 						{formatDistanceToNow(time, { includeSeconds: true })} ago
@@ -231,9 +230,6 @@ const Thread = ({ currentUser, signedIn }) => {
 					<div className="post-text">
 						<p>{text}</p>
 					</div>
-					<Link to={`/r/${subreddit}/${postID}`}>
-						<div className="post-comments">Comments</div>
-					</Link>
 				</div>
 			</div>
 			<form id="comment-form">

@@ -53,7 +53,6 @@ const SubredditList = (props) => {
 	};
 	return (
 		<div className="subreddit-list-wrapper">
-			<input type="text" id="search" name="search" placeholder="Search" />
 			<ul>
 				{list.map((item, i) => {
 					return (
@@ -63,7 +62,11 @@ const SubredditList = (props) => {
 					);
 				})}
 			</ul>
-			<button type='button' className="subreddit-create" onClick={() => setCreate(true)}>
+			<button
+				type="button"
+				className="subreddit-create"
+				onClick={() => setCreate(true)}
+			>
 				Create Subreddit
 			</button>
 			{create ? (

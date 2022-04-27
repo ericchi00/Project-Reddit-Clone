@@ -15,22 +15,36 @@ const Subreddit = ({ username, signedIn }) => {
 	const [createPost, setCreatePost] = useState(false);
 	const [title, setTitle] = useState('');
 	const [text, setText] = useState('');
+	const [hot, setHot] = useState(true);
+	const [newest, setNewest] = useState(false);
 	const { subreddit } = useParams();
 
 	useEffect(() => {
-		grabPostsFromFirebase();
-	}, [subreddit, createPost]);
+		if (hot === true) {
+			grabPostsFromFirebase('hot');
+		} else {
+			grabPostsFromFirebase('new');
+		}
+	}, [subreddit, createPost, newest]);
 
-	const grabPostsFromFirebase = async () => {
+	const grabPostsFromFirebase = async (expr) => {
 		let postsArr = [];
 		const firestore = getFirestore();
 		const collectionRef = collection(firestore, `Subreddit/${subreddit}/posts`);
 		// sorts by newest on bottom first, oldest on top
-		const q = query(collectionRef, orderBy('timestamp', 'asc'));
-		const querySnapshot = await getDocs(q);
-		querySnapshot.forEach((doc) => {
-			postsArr.push({ data: doc.data(), id: doc.id });
-		});
+		if (expr === 'hot') {
+			const q = query(collectionRef, orderBy('score', 'desc'));
+			const querySnapshot = await getDocs(q);
+			querySnapshot.forEach((doc) => {
+				postsArr.push({ data: doc.data(), id: doc.id });
+			});
+		} else if (expr === 'new') {
+			const q = query(collectionRef, orderBy('timestamp'));
+			const querySnapshot = await getDocs(q);
+			querySnapshot.forEach((doc) => {
+				postsArr.push({ data: doc.data(), id: doc.id });
+			});
+		}
 		setPosts(postsArr);
 	};
 
@@ -61,8 +75,22 @@ const Subreddit = ({ username, signedIn }) => {
 		form.reset();
 	};
 
+	const hotHandler = () => {
+		setHot(true);
+		setNewest(false);
+	};
+
+	const newHandler = () => {
+		setNewest(true);
+		setHot(false);
+	};
+
 	return (
 		<div className="subreddit">
+			<div className="hot-new">
+				<button onClick={() => hotHandler()}>Hot</button>
+				<button onClick={() => newHandler()}>New</button>
+			</div>
 			<h2>r/{subreddit}</h2>
 			{posts.length <= 0 ? (
 				<div className="subreddit-empty">

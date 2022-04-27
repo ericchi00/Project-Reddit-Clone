@@ -3,7 +3,6 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
 import SubredditList from './components/SubredditList';
 import Subreddit from './components/Subreddit';
-import Comment from './components/Comment';
 import Homepage from './components/Homepage';
 import {
 	getAuth,
@@ -14,6 +13,7 @@ import {
 } from 'firebase/auth';
 import './style/index.css';
 import { getFirestore, doc, setDoc, getDoc } from '@firebase/firestore';
+import Thread from './components/Thread';
 
 const App = () => {
 	const [signedIn, setSignedIn] = useState(false);
@@ -75,7 +75,7 @@ const App = () => {
 				/>
 				<Route
 					path="/r/:subreddit/:postID"
-					element={<Comment username={username} signedIn={signedIn} />}
+					element={<Thread username={username} signedIn={signedIn} />}
 				/>
 			</Routes>
 		</BrowserRouter>

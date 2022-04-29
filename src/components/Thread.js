@@ -25,7 +25,7 @@ const Thread = ({ currentUser, signedIn }) => {
 	const { subreddit, postID } = useParams();
 	const firestore = getFirestore();
 	const [comments, setComments] = useState([]);
-	const [newComment, setNewComment] = useState(false);
+	const [newComment, setNewComment] = useState(null);
 	const [score, setPostScore] = useState(null);
 	const [title, setPostTitle] = useState(null);
 	const [text, setPostText] = useState(null);
@@ -37,6 +37,7 @@ const Thread = ({ currentUser, signedIn }) => {
 
 	const [hot, setHot] = useState(true);
 	const [newest, setNewest] = useState(false);
+	const [removeComment, setRemoveComment] = useState(false);
 
 	useEffect(() => {
 		grabPostData();
@@ -45,7 +46,10 @@ const Thread = ({ currentUser, signedIn }) => {
 		} else {
 			grabComments('new');
 		}
-	}, [newComment, newest]);
+		setNewComment(false);
+		setRemoveComment(false);
+		console.log('readingData');
+	}, [newComment, newest, removeComment]);
 
 	const commentHandler = (e) => {
 		const { value } = e.target;
@@ -286,6 +290,7 @@ const Thread = ({ currentUser, signedIn }) => {
 					{comments.map((comment, i) => {
 						return (
 							<Comment
+								removeComment={setRemoveComment}
 								postID={postID}
 								subreddit={subreddit}
 								currentUser={currentUser}

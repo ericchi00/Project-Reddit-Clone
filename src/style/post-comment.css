@@ -99,3 +99,7 @@
 .comment-sort button {
     width: 50px;
 }
+
+.delete-comment {
+    font-size: smaller;
+}

@@ -13,6 +13,7 @@ import {
 	arrayUnion,
 	increment,
 	getDoc,
+	deleteDoc,
 } from '@firebase/firestore';
 
 const Comment = ({
@@ -24,10 +25,9 @@ const Comment = ({
 	currentUser,
 	subreddit,
 	postID,
+	removeComment,
 }) => {
-	useEffect(() => {}, []);
 	const [updatedScore, setUpdatedScore] = useState(score);
-
 	const firestore = getFirestore();
 
 	const upvote = async () => {
@@ -143,6 +143,31 @@ const Comment = ({
 		});
 	};
 
+	const deleteComment = async () => {
+		const collectionRef = collection(
+			firestore,
+			`Subreddit/${subreddit}/posts/${postID}/comments`
+		);
+		const q = query(collectionRef);
+		const querySnapshot = await getDocs(q);
+		querySnapshot.forEach(async (item) => {
+			if (item.data().timestamp === time) {
+				await deleteDoc(
+					doc(
+						firestore,
+						'Subreddit',
+						`${subreddit}`,
+						'posts',
+						`${postID}`,
+						'comments',
+						item.id
+					)
+				);
+			}
+		});
+		removeComment(true);
+	};
+
 	return (
 		<div className="comment">
 			<div className="comments-upvote">
@@ -156,6 +181,15 @@ const Comment = ({
 					<div className="comment-time">
 						{formatDistanceToNow(time, { includeSeconds: true })} ago
 					</div>
+					{currentUser === name ? (
+						<button
+							type="button"
+							className="delete-comment"
+							onClick={() => deleteComment()}
+						>
+							Delete
+						</button>
+					) : null}
 				</div>
 				<div className="comment-text">{text}</div>
 			</div>

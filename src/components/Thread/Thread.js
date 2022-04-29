@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router';
-import up from '../images/arrow-single-up.svg';
-import down from '../images/arrow-single-down.svg';
+import up from '../../images/arrow-single-up.svg';
+import down from '../../images/arrow-single-down.svg';
 import {
 	collection,
 	doc,
@@ -17,9 +17,10 @@ import {
 	orderBy,
 } from '@firebase/firestore';
 import { Link } from 'react-router-dom';
-import '../style/post-comment.css';
+import '../../style/post-comment.css';
 import { formatDistanceToNow } from 'date-fns';
 import Comment from './Comment';
+import CommentForm from './CommentForm';
 
 const Thread = ({ currentUser, signedIn }) => {
 	const { subreddit, postID } = useParams();
@@ -260,19 +261,10 @@ const Thread = ({ currentUser, signedIn }) => {
 					</div>
 				</div>
 			</div>
-			<form id="comment-form">
-				<textarea
-					id="comment"
-					name="comment"
-					rows="5"
-					cols="60"
-					placeholder="Enter comment"
-					onChange={(e) => commentHandler(e)}
-				/>
-				<button type="button" onClick={(e) => submitComment(e)}>
-					Submit
-				</button>
-			</form>
+			<CommentForm
+				commentHandler={commentHandler}
+				submitComment={submitComment}
+			/>
 			{comments.length <= 0 ? (
 				<div className="no-comments">
 					There are no comments. Make the first comment!

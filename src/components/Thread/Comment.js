@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import up from '../images/arrow-single-up.svg';
-import down from '../images/arrow-single-down.svg';
+import React, { useState } from 'react';
+import up from '../../images/arrow-single-up.svg';
+import down from '../../images/arrow-single-down.svg';
 import { formatDistanceToNow } from 'date-fns';
 import {
 	collection,

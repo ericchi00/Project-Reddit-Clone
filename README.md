@@ -14,6 +14,8 @@ Create posts in individual subreddits
 
 Sort Subreddit posts by Hot(score) or New
 
+Sort comments by Hot(score) or new
+
 Upvote/Downvote posts & comments
 
 Login using Google's authentication

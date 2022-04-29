@@ -45,6 +45,11 @@ const Post = ({
 			return;
 		}
 
+		if (currentUser === name) {
+			alert("You can't vote on your own post.");
+			return;
+		}
+
 		const docRef = doc(firestore, 'UserLikes', currentUser);
 		const docSnap = await getDoc(docRef);
 		const upvote = docSnap.data().upvotes;
@@ -111,6 +116,11 @@ const Post = ({
 	const downVote = async () => {
 		if (!signedIn) {
 			alert('You must be signed in to vote.');
+			return;
+		}
+
+		if (currentUser === name) {
+			alert("You can't vote on your own post.");
 			return;
 		}
 

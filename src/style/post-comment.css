@@ -55,11 +55,11 @@
     display: flex;
     flex-direction: column;
     max-width: fit-content;
+    gap: 1rem;
 }
 
 #comment-form button {
-    width: 150px;
-    margin-left: auto;
+    width: fit-content;
 }
 
 .comments {

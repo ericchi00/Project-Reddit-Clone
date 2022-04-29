@@ -27,14 +27,10 @@ const Thread = ({ currentUser, signedIn }) => {
 	const firestore = getFirestore();
 	const [comments, setComments] = useState([]);
 	const [newComment, setNewComment] = useState(null);
-	const [score, setPostScore] = useState(null);
-	const [title, setPostTitle] = useState(null);
-	const [text, setPostText] = useState(null);
-	const [name, setPostName] = useState(null);
-	const [time, setPostTime] = useState(0);
+	const [postInfo, setPostInfo] = useState({ time: 0 });
 
 	const [commentText, setCommentText] = useState('');
-	const [updatedScore, setUpdatedScore] = useState(score);
+	const [updatedScore, setUpdatedScore] = useState(null);
 
 	const [sort, setSort] = useState('hot');
 	// state to pass down to comment
@@ -59,11 +55,13 @@ const Thread = ({ currentUser, signedIn }) => {
 		const querySnapshot = await getDocs(q);
 		querySnapshot.forEach((item) => {
 			if (item.id === postID) {
-				setPostTime(item.data().timestamp);
-				setPostScore(item.data().score);
-				setPostTitle(item.data().title);
-				setPostText(item.data().text);
-				setPostName(item.data().name);
+				setPostInfo({
+					time: item.data().timestamp,
+					score: item.data().score,
+					title: item.data().title,
+					text: item.data().text,
+					name: item.data().name,
+				});
 				setUpdatedScore(item.data().score);
 			}
 		});
@@ -103,14 +101,15 @@ const Thread = ({ currentUser, signedIn }) => {
 		const docRef = doc(firestore, 'UserLikes', currentUser);
 		const docSnap = await getDoc(docRef);
 		const upvote = docSnap.data().upvotes;
+		const downvote = docSnap.data().downvotes;
 
 		const collectionRef = collection(firestore, `Subreddit/${subreddit}/posts`);
 		const q = query(collectionRef);
 		const querySnapshot = await getDocs(q);
 		querySnapshot.forEach(async (item) => {
-			// searches if user already upvoted & removes it
+			// searches if user already upvoted & removes it if user upvotes again
 			if (upvote.length > 0) {
-				const originalVote = upvote.filter((item) => item === time);
+				const originalVote = upvote.filter((item) => item === postInfo.time);
 				if (item.data().timestamp === originalVote[0]) {
 					await updateDoc(
 						doc(firestore, `Subreddit/${subreddit}/posts/${item.id}`),
@@ -119,15 +118,34 @@ const Thread = ({ currentUser, signedIn }) => {
 						}
 					);
 					await updateDoc(doc(firestore, `UserLikes/${currentUser}`), {
-						upvotes: arrayRemove(time),
+						upvotes: arrayRemove(postInfo.time),
 					});
 					setUpdatedScore(item.data().score - 1);
 					return;
 				}
 			}
 
+			// if user already downvoted, and then upvotes, it'll add 2 to score
+			if (downvote.length > 0) {
+				const originalVote = downvote.filter((item) => item === postInfo.time);
+				if (item.data().timestamp === originalVote[0]) {
+					await updateDoc(
+						doc(firestore, `Subreddit/${subreddit}/posts/${item.id}`),
+						{
+							score: increment(2),
+						}
+					);
+					await updateDoc(doc(firestore, `UserLikes/${currentUser}`), {
+						upvotes: arrayUnion(postInfo.time),
+						downvotes: arrayRemove(postInfo.time),
+					});
+					setUpdatedScore(item.data().score + 2);
+					return;
+				}
+			}
+
 			// updates vote if user hasn't already upvoted
-			if (item.data().timestamp === time) {
+			if (item.data().timestamp === postInfo.time) {
 				await updateDoc(
 					doc(firestore, `Subreddit/${subreddit}/posts/${item.id}`),
 					{
@@ -135,8 +153,8 @@ const Thread = ({ currentUser, signedIn }) => {
 					}
 				);
 				await updateDoc(doc(firestore, `UserLikes/${currentUser}`), {
-					upvotes: arrayUnion(time),
-					downvotes: arrayRemove(time),
+					upvotes: arrayUnion(postInfo.time),
+					downvotes: arrayRemove(postInfo.time),
 				});
 				setUpdatedScore(item.data().score + 1);
 			}
@@ -151,6 +169,7 @@ const Thread = ({ currentUser, signedIn }) => {
 
 		const docRef = doc(firestore, 'UserLikes', currentUser);
 		const docSnap = await getDoc(docRef);
+		const upvote = docSnap.data().upvotes;
 		const downvote = docSnap.data().downvotes;
 
 		const collectionRef = collection(firestore, `Subreddit/${subreddit}/posts`);
@@ -159,7 +178,7 @@ const Thread = ({ currentUser, signedIn }) => {
 		querySnapshot.forEach(async (item) => {
 			// searches if user already downvoted & removes it
 			if (downvote.length > 0) {
-				const originalVote = downvote.filter((item) => item === time);
+				const originalVote = downvote.filter((item) => item === postInfo.time);
 				if (item.data().timestamp === originalVote[0]) {
 					await updateDoc(
 						doc(firestore, `Subreddit/${subreddit}/posts/${item.id}`),
@@ -168,15 +187,34 @@ const Thread = ({ currentUser, signedIn }) => {
 						}
 					);
 					await updateDoc(doc(firestore, `UserLikes/${currentUser}`), {
-						downvotes: arrayRemove(time),
+						downvotes: arrayRemove(postInfo.time),
 					});
 					setUpdatedScore(item.data().score + 1);
 					return;
 				}
 			}
 
+			// if user already upvoted post and then downvotes it, it'll -2 from score
+			if (upvote.length > 0) {
+				const originalVote = upvote.filter((item) => item === postInfo.time);
+				if (item.data().timestamp === originalVote[0]) {
+					await updateDoc(
+						doc(firestore, `Subreddit/${subreddit}/posts/${item.id}`),
+						{
+							score: increment(-2),
+						}
+					);
+					await updateDoc(doc(firestore, `UserLikes/${currentUser}`), {
+						upvotes: arrayRemove(postInfo.time),
+						downvotes: arrayUnion(postInfo.time),
+					});
+					setUpdatedScore(item.data().score - 2);
+					return;
+				}
+			}
+
 			// downvotes if user already hasn't downvoted
-			if (item.data().timestamp === time) {
+			if (item.data().timestamp === postInfo.time) {
 				await updateDoc(
 					doc(firestore, `Subreddit/${subreddit}/posts/${item.id}`),
 					{
@@ -184,8 +222,8 @@ const Thread = ({ currentUser, signedIn }) => {
 					}
 				);
 				await updateDoc(doc(firestore, `UserLikes/${currentUser}`), {
-					upvotes: arrayRemove(time),
-					downvotes: arrayUnion(time),
+					upvotes: arrayRemove(postInfo.time),
+					downvotes: arrayUnion(postInfo.time),
 				});
 				setUpdatedScore(item.data().score - 1);
 			}
@@ -242,13 +280,13 @@ const Thread = ({ currentUser, signedIn }) => {
 					<img src={down} alt="downvote arrow" onClick={() => downVote()} />
 				</div>
 				<div className="posts-wrapper">
-					<div className="thread-title">{title}</div>
+					<div className="thread-title">{postInfo.title}</div>
 					<div className="post-submitter">
-						Submitted by {name}{' '}
-						{formatDistanceToNow(time, { includeSeconds: true })} ago
+						Submitted by {postInfo.name}{' '}
+						{formatDistanceToNow(postInfo.time, { includeSeconds: true })} ago
 					</div>
 					<div className="post-text">
-						<p>{text}</p>
+						<p>{postInfo.text}</p>
 					</div>
 				</div>
 			</div>

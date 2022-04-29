@@ -48,6 +48,7 @@ const Post = ({
 		const docRef = doc(firestore, 'UserLikes', currentUser);
 		const docSnap = await getDoc(docRef);
 		const upvote = docSnap.data().upvotes;
+		const downvote = docSnap.data().downvotes;
 
 		const collectionRef = collection(firestore, `Subreddit/${subreddit}/posts`);
 		const q = query(collectionRef);
@@ -67,6 +68,25 @@ const Post = ({
 						upvotes: arrayRemove(time),
 					});
 					setUpdatedScore(item.data().score - 1);
+					return;
+				}
+			}
+
+			// if user already downvoted, and then upvotes, it'll add 2 to score
+			if (downvote.length > 0) {
+				const originalVote = downvote.filter((item) => item === time);
+				if (item.data().timestamp === originalVote[0]) {
+					await updateDoc(
+						doc(firestore, `Subreddit/${subreddit}/posts/${item.id}`),
+						{
+							score: increment(2),
+						}
+					);
+					await updateDoc(doc(firestore, `UserLikes/${currentUser}`), {
+						upvotes: arrayUnion(time),
+						downvotes: arrayRemove(time),
+					});
+					setUpdatedScore(item.data().score + 2);
 					return;
 				}
 			}
@@ -96,6 +116,7 @@ const Post = ({
 
 		const docRef = doc(firestore, 'UserLikes', currentUser);
 		const docSnap = await getDoc(docRef);
+		const upvote = docSnap.data().upvotes;
 		const downvote = docSnap.data().downvotes;
 
 		const collectionRef = collection(firestore, `Subreddit/${subreddit}/posts`);
@@ -116,6 +137,25 @@ const Post = ({
 						downvotes: arrayRemove(time),
 					});
 					setUpdatedScore(item.data().score + 1);
+					return;
+				}
+			}
+
+			// if user already upvoted post and then downvotes it, it'll -2 from score
+			if (upvote.length > 0) {
+				const originalVote = upvote.filter((item) => item === time);
+				if (item.data().timestamp === originalVote[0]) {
+					await updateDoc(
+						doc(firestore, `Subreddit/${subreddit}/posts/${item.id}`),
+						{
+							score: increment(-2),
+						}
+					);
+					await updateDoc(doc(firestore, `UserLikes/${currentUser}`), {
+						upvotes: arrayRemove(time),
+						downvotes: arrayUnion(time),
+					});
+					setUpdatedScore(item.data().score - 2);
 					return;
 				}
 			}

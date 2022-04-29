@@ -13,7 +13,7 @@ import {
 } from 'firebase/auth';
 import './style/index.css';
 import { getFirestore, doc, setDoc, getDoc } from '@firebase/firestore';
-import Thread from './components/Thread';
+import Thread from './components/Thread/Thread';
 
 const App = () => {
 	const [signedIn, setSignedIn] = useState(false);

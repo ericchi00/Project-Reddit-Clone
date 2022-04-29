@@ -122,7 +122,8 @@ header ul {
 .upvote-downvote {
   display: flex;
   flex-direction: column;
-  gap: .5rem;
+  align-items: center;
+  gap: .1rem;
 }
 
 .upvote-downvote img {

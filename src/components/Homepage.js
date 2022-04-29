@@ -4,11 +4,14 @@ import Post from './Post';
 
 const Homepage = ({ signedIn, currentUser }) => {
 	const [posts, setPosts] = useState([]);
+	const [removePost, setRemovePost] = useState(null);
 
 	useEffect(() => {
 		document.title = 'Reddit Clone';
 		grabAllPosts();
-	}, []);
+		setRemovePost(false);
+		console.log('reading data')
+	}, [removePost]);
 
 	const grabAllPosts = async () => {
 		// using set as the for loops add duplicate objects
@@ -39,6 +42,7 @@ const Homepage = ({ signedIn, currentUser }) => {
 				{posts.map((post, i) => {
 					return (
 						<Post
+							removePost={setRemovePost}
 							currentUser={currentUser}
 							signedIn={signedIn}
 							sub={post.name}

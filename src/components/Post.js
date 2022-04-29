@@ -138,9 +138,17 @@ const Post = ({
 	};
 
 	const deletePost = async () => {
-		const docRef = doc(firestore, `Subreddit/${subreddit}/posts/${docID}`);
-		await deleteDoc(docRef);
-		removePost(true);
+		// subreddit is undefined if it's on homepage
+		// grabs subreddit's name from sub prop
+		if (subreddit === undefined) {
+			const docRef = doc(firestore, `Subreddit/${sub}/posts/${docID}`);
+			await deleteDoc(docRef);
+			removePost(true);
+		} else {
+			const docRef = doc(firestore, `Subreddit/${subreddit}/posts/${docID}`);
+			await deleteDoc(docRef);
+			removePost(true);
+		}
 	};
 
 	return (

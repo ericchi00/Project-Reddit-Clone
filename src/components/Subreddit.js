@@ -20,6 +20,7 @@ const Subreddit = ({ currentUser, signedIn }) => {
 	const { subreddit } = useParams();
 
 	useEffect(() => {
+		document.title = `r/${subreddit}`;
 		if (hot) {
 			grabPostsFromFirebase('hot');
 		} else {

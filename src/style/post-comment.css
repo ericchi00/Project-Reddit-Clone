@@ -5,9 +5,15 @@
 
 .post-comment-wrapper {
     display: flex;
-    padding: 1rem;
+    padding-top: 1rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-bottom: .5rem;
     gap: 1rem;
     width: 100%;
+    border-bottom: black dotted 1px;
+    margin-bottom: .5rem;
+    ;
 }
 
 .post-comment-wrapper .post-submitter {
@@ -103,4 +109,10 @@
 
 .delete-comment {
     font-size: smaller;
+}
+
+.comment-name {
+    font-size: smaller;
+    padding-top: .3rem;
+    padding-bottom: .3rem;
 }

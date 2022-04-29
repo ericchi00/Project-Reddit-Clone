@@ -36,25 +36,37 @@ const Thread = ({ currentUser, signedIn }) => {
 	const [commentText, setCommentText] = useState('');
 	const [updatedScore, setUpdatedScore] = useState(score);
 
-	const [hot, setHot] = useState(true);
-	const [newest, setNewest] = useState(false);
+	const [sort, setSort] = useState('hot');
 	// state to pass down to comment
 	const [removeComment, setRemoveComment] = useState(false);
 
 	useEffect(() => {
 		grabPostData();
-		if (hot) {
-			grabComments('hot');
-		} else {
-			grabComments('new');
-		}
+		grabComments(sort);
 		setNewComment(false);
 		setRemoveComment(false);
-	}, [newComment, newest, removeComment]);
+	}, [newComment, removeComment, sort]);
 
 	const commentHandler = (e) => {
 		const { value } = e.target;
 		setCommentText(value);
+	};
+
+	const grabPostData = async () => {
+		const firestore = getFirestore();
+		const collectionRef = collection(firestore, `Subreddit/${subreddit}/posts`);
+		const q = query(collectionRef);
+		const querySnapshot = await getDocs(q);
+		querySnapshot.forEach((item) => {
+			if (item.id === postID) {
+				setPostTime(item.data().timestamp);
+				setPostScore(item.data().score);
+				setPostTitle(item.data().title);
+				setPostText(item.data().text);
+				setPostName(item.data().name);
+				setUpdatedScore(item.data().score);
+			}
+		});
 	};
 
 	const grabComments = async (expr) => {
@@ -80,23 +92,6 @@ const Thread = ({ currentUser, signedIn }) => {
 			});
 		}
 		setComments(commentsArr);
-	};
-
-	const grabPostData = async () => {
-		const firestore = getFirestore();
-		const collectionRef = collection(firestore, `Subreddit/${subreddit}/posts`);
-		const q = query(collectionRef);
-		const querySnapshot = await getDocs(q);
-		querySnapshot.forEach((item) => {
-			if (item.id === postID) {
-				setPostTime(item.data().timestamp);
-				setPostScore(item.data().score);
-				setPostTitle(item.data().title);
-				setPostText(item.data().text);
-				setPostName(item.data().name);
-				setUpdatedScore(item.data().score);
-			}
-		});
 	};
 
 	const upVote = async () => {
@@ -229,14 +224,10 @@ const Thread = ({ currentUser, signedIn }) => {
 		setNewComment(true);
 	};
 
-	const hotHandler = () => {
-		setHot(true);
-		setNewest(false);
-	};
-
-	const newHandler = () => {
-		setNewest(true);
-		setHot(false);
+	const sortHandler = (e) => {
+		const { value } = e.target;
+		console.log(value);
+		setSort(value);
 	};
 
 	return (
@@ -261,6 +252,14 @@ const Thread = ({ currentUser, signedIn }) => {
 					</div>
 				</div>
 			</div>
+			<div className="comment-sort">
+				<label htmlFor="sort">sorted by: </label>
+				<select name="sort" id="sort" onChange={(e) => sortHandler(e)}>
+					<option value="hot">Hot</option>
+					<option value="new">New</option>
+				</select>
+			</div>
+			<div className="comment-name">Speaking as : {currentUser}</div>
 			<CommentForm
 				commentHandler={commentHandler}
 				submitComment={submitComment}
@@ -271,14 +270,6 @@ const Thread = ({ currentUser, signedIn }) => {
 				</div>
 			) : (
 				<div className="comments">
-					<div className="comment-sort">
-						<button type="button" onClick={() => hotHandler()}>
-							Hot
-						</button>
-						<button type="button" onClick={() => newHandler()}>
-							New
-						</button>
-					</div>
 					{comments.map((comment, i) => {
 						return (
 							<Comment

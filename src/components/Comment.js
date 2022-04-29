@@ -165,6 +165,7 @@ const Comment = ({
 				);
 			}
 		});
+		//state from Thread, forces the thread to rerender to remove the comment
 		removeComment(true);
 	};
 

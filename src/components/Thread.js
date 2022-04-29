@@ -37,6 +37,7 @@ const Thread = ({ currentUser, signedIn }) => {
 
 	const [hot, setHot] = useState(true);
 	const [newest, setNewest] = useState(false);
+	// state to pass down to comment
 	const [removeComment, setRemoveComment] = useState(false);
 
 	useEffect(() => {
@@ -48,7 +49,6 @@ const Thread = ({ currentUser, signedIn }) => {
 		}
 		setNewComment(false);
 		setRemoveComment(false);
-		console.log('readingData');
 	}, [newComment, newest, removeComment]);
 
 	const commentHandler = (e) => {

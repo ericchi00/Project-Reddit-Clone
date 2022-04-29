@@ -68,7 +68,10 @@ const App = () => {
 			/>
 			<SubredditList />
 			<Routes>
-				<Route path="/" element={<Homepage />} />
+				<Route
+					path="/"
+					element={<Homepage signedIn={signedIn} currentUser={username} />}
+				/>
 				<Route
 					path="/r/:subreddit"
 					element={<Subreddit currentUser={username} signedIn={signedIn} />}

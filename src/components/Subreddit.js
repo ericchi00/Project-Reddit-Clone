@@ -19,6 +19,9 @@ const Subreddit = ({ currentUser, signedIn }) => {
 	const [newest, setNewest] = useState(false);
 	const { subreddit } = useParams();
 
+	// state to pass down to post
+	const [removePost, setRemovePost] = useState(null);
+
 	useEffect(() => {
 		document.title = `r/${subreddit}`;
 		if (hot) {
@@ -26,7 +29,8 @@ const Subreddit = ({ currentUser, signedIn }) => {
 		} else {
 			grabPostsFromFirebase('new');
 		}
-	}, [subreddit, createPost, newest]);
+		setRemovePost(false);
+	}, [subreddit, createPost, newest, removePost]);
 
 	const grabPostsFromFirebase = async (expr) => {
 		let postsArr = [];
@@ -105,6 +109,7 @@ const Subreddit = ({ currentUser, signedIn }) => {
 					{posts.map((post, i) => {
 						return (
 							<Post
+								removePost={setRemovePost}
 								currentUser={currentUser}
 								signedIn={signedIn}
 								time={post.data.timestamp}

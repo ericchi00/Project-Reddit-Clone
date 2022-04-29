@@ -15,6 +15,7 @@ import {
 	arrayUnion,
 	increment,
 	getDoc,
+	deleteDoc,
 } from '@firebase/firestore';
 
 const Post = ({
@@ -27,6 +28,7 @@ const Post = ({
 	docID,
 	currentUser,
 	sub,
+	removePost,
 }) => {
 	const { subreddit } = useParams();
 	const firestore = getFirestore();
@@ -135,6 +137,12 @@ const Post = ({
 		});
 	};
 
+	const deletePost = async () => {
+		const docRef = doc(firestore, `Subreddit/${subreddit}/posts/${docID}`);
+		await deleteDoc(docRef);
+		removePost(true);
+	};
+
 	return (
 		<li className="post">
 			<div className="post-index">{index}</div>
@@ -172,6 +180,15 @@ const Post = ({
 							<p>Comments</p>
 						</Link>
 					)}
+					{currentUser === name ? (
+						<button
+							type="button"
+							className="delete-post"
+							onClick={() => deletePost()}
+						>
+							Delete
+						</button>
+					) : null}
 				</div>
 			</div>
 		</li>

@@ -142,6 +142,11 @@ header ul {
 .post-comments {
   font-size: smaller;
   display: flex;
+  gap: .3rem;
+}
+
+.delete-post {
+  font-size: smaller;
 }
 
 .add-post {

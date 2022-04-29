@@ -164,5 +164,3 @@ const Comment = ({
 };
 
 export default Comment;
-
-// finish styling and check how often it reads firestore when refreshing

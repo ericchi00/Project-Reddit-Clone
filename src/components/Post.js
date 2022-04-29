@@ -26,6 +26,7 @@ const Post = ({
 	signedIn,
 	docID,
 	currentUser,
+	sub,
 }) => {
 	const { subreddit } = useParams();
 	const firestore = getFirestore();
@@ -146,9 +147,15 @@ const Post = ({
 			</div>
 			<div className="posts-wrapper">
 				<div className="post-title">
-					<Link to={`/r/${subreddit}/${docID}`}>
-						<p>{title}</p>
-					</Link>
+					{subreddit === undefined ? (
+						<Link to={`/r/${sub}/${docID}`}>
+							<p>{title}</p>
+						</Link>
+					) : (
+						<Link to={`/r/${subreddit}/${docID}`}>
+							<p>{title}</p>
+						</Link>
+					)}
 				</div>
 				<div className="post-submitter">
 					Submitted by {name}{' '}
@@ -156,9 +163,15 @@ const Post = ({
 				</div>
 
 				<div className="post-comments">
-					<Link to={`/r/${subreddit}/${docID}`}>
-						<p>Comments</p>
-					</Link>
+					{subreddit === undefined ? (
+						<Link to={`/r/${sub}/${docID}`}>
+							<p>Comments</p>
+						</Link>
+					) : (
+						<Link to={`/r/${subreddit}/${docID}`}>
+							<p>Comments</p>
+						</Link>
+					)}
 				</div>
 			</div>
 		</li>

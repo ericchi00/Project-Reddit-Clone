@@ -39,7 +39,11 @@ const Post = ({
 		// updates posts score after clicking on a different subreddit
 		setUpdatedScore(score);
 		// subreddit is undefined if accessing from homepage
-		if (subreddit === undefined) setSubredditName(sub);
+		if (subreddit === undefined) {
+			setSubredditName(sub);
+		} else if (sub === undefined) {
+			setSubredditName(subreddit);
+		}
 	}, [score]);
 
 	const upVote = async () => {
@@ -239,11 +243,15 @@ const Post = ({
 				</div>
 				<div className="post-submitter">
 					Submitted by {name}{' '}
-					{formatDistanceToNow(time, { includeSeconds: true })} ago to
+					{formatDistanceToNow(time, { includeSeconds: true })} ago
 					{subreddit === undefined ? (
-						<Link to={`/r/${subredditName}`}>
-							<span> r/{subredditName}</span>
-						</Link>
+						<>
+							{' '}
+							to
+							<Link to={`/r/${subredditName}`}>
+								<span> r/{subredditName}</span>
+							</Link>
+						</>
 					) : null}
 				</div>
 				<div className="post-comments">

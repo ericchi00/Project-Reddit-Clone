@@ -23,3 +23,5 @@ Login using Google's authentication
 Prevents user from voting on their own posts/comments
 
 Delete posts and comments
+
+Sets upvote/downvote color if already voted on

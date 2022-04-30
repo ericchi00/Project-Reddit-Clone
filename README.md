@@ -19,3 +19,7 @@ Sort comments by Hot(score) or new
 Upvote/Downvote posts & comments
 
 Login using Google's authentication
+
+Prevents user from voting on their own posts/comments
+
+Delete posts and comments

@@ -10,7 +10,6 @@ const Homepage = ({ signedIn, currentUser }) => {
 		document.title = 'Reddit Clone';
 		grabAllPosts();
 		setRemovePost(false);
-		console.log('reading data')
 	}, [removePost]);
 
 	const grabAllPosts = async () => {

@@ -101,9 +101,12 @@ header ul {
 .post {
   padding-top: 1rem;
   display: flex;
-  gap: 1rem;
   align-items: center;
-  width: fit-content;
+}
+
+.post-index {
+  width: 25px;
+  text-align: center;
 }
 
 .post-title {
@@ -132,7 +135,8 @@ header ul {
 
 .score-wrapper {
   display: flex;
-  gap: .5rem;
+  justify-content: center;
+  width: 75px;
 }
 
 .posts-wrapper {

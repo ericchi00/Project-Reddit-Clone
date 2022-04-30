@@ -111,7 +111,6 @@ const Thread = ({ currentUser, signedIn }) => {
 		if (upvote.length > 0) {
 			upvote.forEach((vote) => {
 				if (vote === time) {
-					console.log(time);
 					setUpvoteActive(true);
 					setDownvoteActive(false);
 				}
@@ -181,6 +180,7 @@ const Thread = ({ currentUser, signedIn }) => {
 					});
 					setUpdatedScore(item.data().score + 2);
 					setUpvoteActive(true);
+					setDownvoteActive(false);
 					return;
 				}
 			}
@@ -258,6 +258,7 @@ const Thread = ({ currentUser, signedIn }) => {
 					});
 					setUpdatedScore(item.data().score - 2);
 					setDownvoteActive(true);
+					setUpvoteActive(false);
 					return;
 				}
 			}
@@ -376,6 +377,7 @@ const Thread = ({ currentUser, signedIn }) => {
 								score={comment.score}
 								text={comment.text}
 								time={comment.timestamp}
+								addVoteClassOnLoad={addVoteClassOnLoad}
 							/>
 						);
 					})}

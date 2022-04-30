@@ -33,10 +33,13 @@ const Post = ({
 	const { subreddit } = useParams();
 	const firestore = getFirestore();
 	const [updatedScore, setUpdatedScore] = useState(score);
+	const [subredditName, setSubredditName] = useState(subreddit);
 
 	useEffect(() => {
 		// updates posts score after clicking on a different subreddit
 		setUpdatedScore(score);
+		// subreddit is undefined if accessing from homepage
+		if (subreddit === undefined) setSubredditName(sub);
 	}, [score]);
 
 	const upVote = async () => {
@@ -50,12 +53,17 @@ const Post = ({
 			return;
 		}
 
+		console.log(subredditName);
+
 		const docRef = doc(firestore, 'UserLikes', currentUser);
 		const docSnap = await getDoc(docRef);
 		const upvote = docSnap.data().upvotes;
 		const downvote = docSnap.data().downvotes;
 
-		const collectionRef = collection(firestore, `Subreddit/${subreddit}/posts`);
+		const collectionRef = collection(
+			firestore,
+			`Subreddit/${subredditName}/posts`
+		);
 		const q = query(collectionRef);
 		const querySnapshot = await getDocs(q);
 		querySnapshot.forEach(async (item) => {
@@ -64,7 +72,7 @@ const Post = ({
 				const originalVote = upvote.filter((item) => item === time);
 				if (item.data().timestamp === originalVote[0]) {
 					await updateDoc(
-						doc(firestore, `Subreddit/${subreddit}/posts/${item.id}`),
+						doc(firestore, `Subreddit/${subredditName}/posts/${item.id}`),
 						{
 							score: increment(-1),
 						}
@@ -82,7 +90,7 @@ const Post = ({
 				const originalVote = downvote.filter((item) => item === time);
 				if (item.data().timestamp === originalVote[0]) {
 					await updateDoc(
-						doc(firestore, `Subreddit/${subreddit}/posts/${item.id}`),
+						doc(firestore, `Subreddit/${subredditName}/posts/${item.id}`),
 						{
 							score: increment(2),
 						}
@@ -99,7 +107,7 @@ const Post = ({
 			// updates vote if user hasn't already upvoted
 			if (item.data().timestamp === time) {
 				await updateDoc(
-					doc(firestore, `Subreddit/${subreddit}/posts/${item.id}`),
+					doc(firestore, `Subreddit/${subredditName}/posts/${item.id}`),
 					{
 						score: increment(1),
 					}
@@ -129,7 +137,10 @@ const Post = ({
 		const upvote = docSnap.data().upvotes;
 		const downvote = docSnap.data().downvotes;
 
-		const collectionRef = collection(firestore, `Subreddit/${subreddit}/posts`);
+		const collectionRef = collection(
+			firestore,
+			`Subreddit/${subredditName}/posts`
+		);
 		const q = query(collectionRef);
 		const querySnapshot = await getDocs(q);
 		querySnapshot.forEach(async (item) => {
@@ -138,7 +149,7 @@ const Post = ({
 				const originalVote = downvote.filter((item) => item === time);
 				if (item.data().timestamp === originalVote[0]) {
 					await updateDoc(
-						doc(firestore, `Subreddit/${subreddit}/posts/${item.id}`),
+						doc(firestore, `Subreddit/${subredditName}/posts/${item.id}`),
 						{
 							score: increment(1),
 						}
@@ -156,7 +167,7 @@ const Post = ({
 				const originalVote = upvote.filter((item) => item === time);
 				if (item.data().timestamp === originalVote[0]) {
 					await updateDoc(
-						doc(firestore, `Subreddit/${subreddit}/posts/${item.id}`),
+						doc(firestore, `Subreddit/${subredditName}/posts/${item.id}`),
 						{
 							score: increment(-2),
 						}
@@ -173,7 +184,7 @@ const Post = ({
 			// downvotes if user already hasn't downvoted
 			if (item.data().timestamp === time) {
 				await updateDoc(
-					doc(firestore, `Subreddit/${subreddit}/posts/${item.id}`),
+					doc(firestore, `Subreddit/${subredditName}/posts/${item.id}`),
 					{
 						score: increment(-1),
 					}
@@ -188,17 +199,26 @@ const Post = ({
 	};
 
 	const deletePost = async () => {
-		// subreddit is undefined if it's on homepage
-		// grabs subreddit's name from sub prop
-		if (subreddit === undefined) {
-			const docRef = doc(firestore, `Subreddit/${sub}/posts/${docID}`);
-			await deleteDoc(docRef);
-			removePost(true);
-		} else {
-			const docRef = doc(firestore, `Subreddit/${subreddit}/posts/${docID}`);
-			await deleteDoc(docRef);
-			removePost(true);
-		}
+		// removes all comments from post
+		const collectionRef = collection(
+			firestore,
+			`Subreddit/${subredditName}/posts/${docID}/comments`
+		);
+		const q = query(collectionRef);
+		const querySnapshot = await getDocs(q);
+		querySnapshot.forEach((item) => {
+			deleteDoc(
+				doc(
+					firestore,
+					`Subreddit/${subredditName}/posts/${docID}/comments/${item.id}`
+				)
+			);
+		});
+
+		// removes posts
+		const docRef = doc(firestore, `Subreddit/${subredditName}/posts/${docID}`);
+		await deleteDoc(docRef);
+		removePost(true);
 	};
 
 	return (

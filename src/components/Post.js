@@ -233,31 +233,23 @@ const Post = ({
 			</div>
 			<div className="posts-wrapper">
 				<div className="post-title">
-					{subreddit === undefined ? (
-						<Link to={`/r/${sub}/${docID}`}>
-							<p>{title}</p>
-						</Link>
-					) : (
-						<Link to={`/r/${subreddit}/${docID}`}>
-							<p>{title}</p>
-						</Link>
-					)}
+					<Link to={`/r/${subredditName}/${docID}`}>
+						<p>{title}</p>
+					</Link>
 				</div>
 				<div className="post-submitter">
 					Submitted by {name}{' '}
-					{formatDistanceToNow(time, { includeSeconds: true })} ago
-				</div>
-
-				<div className="post-comments">
+					{formatDistanceToNow(time, { includeSeconds: true })} ago to
 					{subreddit === undefined ? (
-						<Link to={`/r/${sub}/${docID}`}>
-							<p>Comments</p>
+						<Link to={`/r/${subredditName}`}>
+							<span> r/{subredditName}</span>
 						</Link>
-					) : (
-						<Link to={`/r/${subreddit}/${docID}`}>
-							<p>Comments</p>
-						</Link>
-					)}
+					) : null}
+				</div>
+				<div className="post-comments">
+					<Link to={`/r/${subredditName}/${docID}`}>
+						<p>Comments</p>
+					</Link>
 					{currentUser === name ? (
 						<button
 							type="button"

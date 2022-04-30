@@ -29,7 +29,7 @@ const Homepage = ({ signedIn, currentUser }) => {
 				});
 			});
 			// sorting by high score to low
-			const newArr = [...postsArr].sort((a, b) => b.data.score - a.data.score);
+			let newArr = [...postsArr].sort((a, b) => b.data.score - a.data.score);
 			setPosts(newArr);
 		});
 	};

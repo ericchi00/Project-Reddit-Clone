@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router';
-import up from '../../images/arrow-single-up.svg';
-import down from '../../images/arrow-single-down.svg';
 import {
 	collection,
 	doc,
@@ -28,6 +26,7 @@ const Thread = ({ currentUser, signedIn }) => {
 	const [comments, setComments] = useState([]);
 	const [newComment, setNewComment] = useState(null);
 	const [postInfo, setPostInfo] = useState({ time: 0 });
+	const [time, setTime] = useState(null);
 
 	const [commentText, setCommentText] = useState('');
 	const [updatedScore, setUpdatedScore] = useState(null);
@@ -35,13 +34,17 @@ const Thread = ({ currentUser, signedIn }) => {
 	const [sort, setSort] = useState('hot');
 	// state to pass down to comment
 	const [removeComment, setRemoveComment] = useState(false);
+	// sets css class to show vote
+	const [upvoteActive, setUpvoteActive] = useState(false);
+	const [downvoteActive, setDownvoteActive] = useState(false);
 
 	useEffect(() => {
 		grabPostData();
 		grabComments(sort);
 		setNewComment(false);
 		setRemoveComment(false);
-	}, [newComment, removeComment, sort]);
+		addVoteClassOnLoad();
+	}, [newComment, removeComment, sort, time]);
 
 	const commentHandler = (e) => {
 		const { value } = e.target;
@@ -49,22 +52,29 @@ const Thread = ({ currentUser, signedIn }) => {
 	};
 
 	const grabPostData = async () => {
-		const firestore = getFirestore();
-		const collectionRef = collection(firestore, `Subreddit/${subreddit}/posts`);
-		const q = query(collectionRef);
-		const querySnapshot = await getDocs(q);
-		querySnapshot.forEach((item) => {
-			if (item.id === postID) {
-				setPostInfo({
-					time: item.data().timestamp,
-					score: item.data().score,
-					title: item.data().title,
-					text: item.data().text,
-					name: item.data().name,
-				});
-				setUpdatedScore(item.data().score);
-			}
-		});
+		try {
+			const collectionRef = collection(
+				firestore,
+				`Subreddit/${subreddit}/posts`
+			);
+			const q = query(collectionRef);
+			const querySnapshot = await getDocs(q);
+			querySnapshot.forEach((item) => {
+				if (item.id === postID) {
+					setPostInfo({
+						time: item.data().timestamp,
+						score: item.data().score,
+						title: item.data().title,
+						text: item.data().text,
+						name: item.data().name,
+					});
+					setUpdatedScore(item.data().score);
+					setTime(item.data().timestamp);
+				}
+			});
+		} catch (error) {
+			alert(error, 'has occured. Please reload page');
+		}
 	};
 
 	const grabComments = async (expr) => {
@@ -90,6 +100,30 @@ const Thread = ({ currentUser, signedIn }) => {
 			});
 		}
 		setComments(commentsArr);
+	};
+
+	const addVoteClassOnLoad = async () => {
+		if (!signedIn) return;
+		const docRef = doc(firestore, 'UserLikes', currentUser);
+		const docSnap = await getDoc(docRef);
+		const upvote = docSnap.data().upvotes;
+		const downvote = docSnap.data().downvotes;
+		if (upvote.length > 0) {
+			upvote.forEach((vote) => {
+				if (vote === time) {
+					console.log(time);
+					setUpvoteActive(true);
+					setDownvoteActive(false);
+				}
+			});
+		} else if (downvote.length > 0) {
+			downvote.forEach((vote) => {
+				if (vote === time) {
+					setDownvoteActive(true);
+					setUpvoteActive(false);
+				}
+			});
+		}
 	};
 
 	const upVote = async () => {
@@ -126,6 +160,7 @@ const Thread = ({ currentUser, signedIn }) => {
 						upvotes: arrayRemove(postInfo.time),
 					});
 					setUpdatedScore(item.data().score - 1);
+					setUpvoteActive(false);
 					return;
 				}
 			}
@@ -145,6 +180,7 @@ const Thread = ({ currentUser, signedIn }) => {
 						downvotes: arrayRemove(postInfo.time),
 					});
 					setUpdatedScore(item.data().score + 2);
+					setUpvoteActive(true);
 					return;
 				}
 			}
@@ -161,6 +197,7 @@ const Thread = ({ currentUser, signedIn }) => {
 					upvotes: arrayUnion(postInfo.time),
 					downvotes: arrayRemove(postInfo.time),
 				});
+				setUpvoteActive(true);
 				setUpdatedScore(item.data().score + 1);
 			}
 		});
@@ -200,6 +237,7 @@ const Thread = ({ currentUser, signedIn }) => {
 						downvotes: arrayRemove(postInfo.time),
 					});
 					setUpdatedScore(item.data().score + 1);
+					setDownvoteActive(false);
 					return;
 				}
 			}
@@ -219,6 +257,7 @@ const Thread = ({ currentUser, signedIn }) => {
 						downvotes: arrayUnion(postInfo.time),
 					});
 					setUpdatedScore(item.data().score - 2);
+					setDownvoteActive(true);
 					return;
 				}
 			}
@@ -236,6 +275,7 @@ const Thread = ({ currentUser, signedIn }) => {
 					downvotes: arrayUnion(postInfo.time),
 				});
 				setUpdatedScore(item.data().score - 1);
+				setDownvoteActive(true);
 			}
 		});
 	};
@@ -274,7 +314,6 @@ const Thread = ({ currentUser, signedIn }) => {
 
 	const sortHandler = (e) => {
 		const { value } = e.target;
-		console.log(value);
 		setSort(value);
 	};
 
@@ -285,9 +324,15 @@ const Thread = ({ currentUser, signedIn }) => {
 			</Link>
 			<div className="post-comment-wrapper">
 				<div className="up-down">
-					<img src={up} alt="upvote arrow" onClick={() => upVote()} />
+					<div
+						className={upvoteActive ? 'arrow up active' : 'arrow up'}
+						onClick={() => upVote()}
+					></div>
 					<span className="post-score">{updatedScore}</span>
-					<img src={down} alt="downvote arrow" onClick={() => downVote()} />
+					<div
+						className={downvoteActive ? 'arrow down active' : 'arrow down'}
+						onClick={() => downVote()}
+					></div>
 				</div>
 				<div className="posts-wrapper">
 					<div className="thread-title">{postInfo.title}</div>

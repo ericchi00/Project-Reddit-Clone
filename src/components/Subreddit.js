@@ -15,8 +15,7 @@ const Subreddit = ({ currentUser, signedIn }) => {
 	const [createPost, setCreatePost] = useState(false);
 	const [title, setTitle] = useState('');
 	const [text, setText] = useState('');
-	const [hot, setHot] = useState(true);
-	const [newest, setNewest] = useState(false);
+	const [sort, setSort] = useState('hot');
 	const { subreddit } = useParams();
 
 	// state to pass down to post
@@ -24,13 +23,9 @@ const Subreddit = ({ currentUser, signedIn }) => {
 
 	useEffect(() => {
 		document.title = `r/${subreddit}`;
-		if (hot) {
-			grabPostsFromFirebase('hot');
-		} else {
-			grabPostsFromFirebase('new');
-		}
+		grabPostsFromFirebase(sort);
 		setRemovePost(false);
-	}, [subreddit, createPost, newest, removePost]);
+	}, [subreddit, createPost, sort, removePost]);
 
 	const grabPostsFromFirebase = async (expr) => {
 		let postsArr = [];
@@ -83,21 +78,11 @@ const Subreddit = ({ currentUser, signedIn }) => {
 		form.reset();
 	};
 
-	const hotHandler = () => {
-		setHot(true);
-		setNewest(false);
-	};
-
-	const newHandler = () => {
-		setNewest(true);
-		setHot(false);
-	};
-
 	return (
 		<div className="subreddit">
 			<div className="hot-new">
-				<button onClick={() => hotHandler()}>Hot</button>
-				<button onClick={() => newHandler()}>New</button>
+				<button onClick={() => setSort('hot')}>Hot</button>
+				<button onClick={() => setSort('new')}>New</button>
 			</div>
 			<h2>r/{subreddit}</h2>
 			{posts.length <= 0 ? (

@@ -1,6 +1,4 @@
-import React, { useState } from 'react';
-import up from '../../images/arrow-single-up.svg';
-import down from '../../images/arrow-single-down.svg';
+import React, { useEffect, useState } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import {
 	collection,
@@ -28,7 +26,37 @@ const Comment = ({
 	removeComment,
 }) => {
 	const [updatedScore, setUpdatedScore] = useState(score);
+	// sets css class to show vote
+	const [upvoteActive, setUpvoteActive] = useState(false);
+	const [downvoteActive, setDownvoteActive] = useState(false);
 	const firestore = getFirestore();
+
+	useEffect(() => {
+		addVoteClassOnLoad();
+	}, []);
+
+	const addVoteClassOnLoad = async () => {
+		if (!signedIn) return;
+		const docRef = doc(firestore, 'UserLikes', currentUser);
+		const docSnap = await getDoc(docRef);
+		const upvote = docSnap.data().upvotes;
+		const downvote = docSnap.data().downvotes;
+		if (upvote.length > 0) {
+			upvote.forEach((vote) => {
+				if (vote === time) {
+					setDownvoteActive(false);
+					setUpvoteActive(true);
+				}
+			});
+		} else if (downvote.length > 0) {
+			downvote.forEach((vote) => {
+				if (vote === time) {
+					setUpvoteActive(false);
+					setDownvoteActive(true);
+				}
+			});
+		}
+	};
 
 	const upvote = async () => {
 		if (!signedIn) {
@@ -70,6 +98,7 @@ const Comment = ({
 						upvotes: arrayRemove(time),
 					});
 					setUpdatedScore(item.data().score - 1);
+					setUpvoteActive(false);
 					return;
 				}
 			}
@@ -92,6 +121,8 @@ const Comment = ({
 						downvotes: arrayRemove(time),
 					});
 					setUpdatedScore(item.data().score + 2);
+					setUpvoteActive(true);
+					setDownvoteActive(false);
 					return;
 				}
 			}
@@ -111,6 +142,7 @@ const Comment = ({
 					upvotes: arrayUnion(time),
 					downvotes: arrayRemove(time),
 				});
+				setUpvoteActive(true);
 				setUpdatedScore(item.data().score + 1);
 			}
 		});
@@ -156,6 +188,7 @@ const Comment = ({
 						downvotes: arrayRemove(time),
 					});
 					setUpdatedScore(item.data().score + 1);
+					setDownvoteActive(false);
 					return;
 				}
 			}
@@ -178,6 +211,8 @@ const Comment = ({
 						downvotes: arrayUnion(time),
 					});
 					setUpdatedScore(item.data().score - 2);
+					setDownvoteActive(true);
+					setUpvoteActive(false);
 					return;
 				}
 			}
@@ -198,6 +233,7 @@ const Comment = ({
 					downvotes: arrayUnion(time),
 				});
 				setUpdatedScore(item.data().score - 1);
+				setDownvoteActive(true);
 			}
 		});
 	};
@@ -231,8 +267,14 @@ const Comment = ({
 	return (
 		<div className="comment">
 			<div className="comments-upvote">
-				<img src={up} alt="comment upvote" onClick={() => upvote()} />
-				<img src={down} alt="comment downvote" onClick={() => downvote()} />
+				<div
+					className={upvoteActive ? 'arrow up active' : 'arrow up'}
+					onClick={() => upvote()}
+				></div>
+				<div
+					className={downvoteActive ? 'arrow down active' : 'arrow down'}
+					onClick={() => downvote()}
+				></div>
 			</div>
 			<div className="comment-border">
 				<div className="comment-info">

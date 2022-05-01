@@ -15,6 +15,8 @@ import {
 	getDoc,
 	deleteDoc,
 } from '@firebase/firestore';
+import { confirmAlert } from 'react-confirm-alert';
+import { unmountComponentAtNode } from 'react-dom';
 
 const Post = ({
 	score,
@@ -234,26 +236,50 @@ const Post = ({
 	};
 
 	const deletePost = async () => {
-		// removes all comments from post
-		const collectionRef = collection(
-			firestore,
-			`Subreddit/${subredditName}/posts/${docID}/comments`
-		);
-		const q = query(collectionRef);
-		const querySnapshot = await getDocs(q);
-		querySnapshot.forEach((item) => {
-			deleteDoc(
-				doc(
-					firestore,
-					`Subreddit/${subredditName}/posts/${docID}/comments/${item.id}`
-				)
-			);
-		});
+		confirmAlert({
+			title: 'Are you sure you want to delete your post?',
+			buttons: [
+				{
+					label: 'No',
+					onClick: () => {
+						unmountComponentAtNode(
+							document.getElementById('react-confirm-alert')
+						);
+					},
+				},
+				{
+					label: 'Yes',
+					onClick: async () => {
+						// removes all comments from post
+						const collectionRef = collection(
+							firestore,
+							`Subreddit/${subredditName}/posts/${docID}/comments`
+						);
+						const q = query(collectionRef);
+						const querySnapshot = await getDocs(q);
+						querySnapshot.forEach((item) => {
+							deleteDoc(
+								doc(
+									firestore,
+									`Subreddit/${subredditName}/posts/${docID}/comments/${item.id}`
+								)
+							);
+						});
 
-		// removes posts
-		const docRef = doc(firestore, `Subreddit/${subredditName}/posts/${docID}`);
-		await deleteDoc(docRef);
-		removePost(true);
+						// removes posts
+						const docRef = doc(
+							firestore,
+							`Subreddit/${subredditName}/posts/${docID}`
+						);
+						await deleteDoc(docRef);
+						removePost(true);
+					},
+				},
+			],
+			closeOnEscape: true,
+			closeOnClickOutside: true,
+			keyCodeForClose: [8, 32],
+		});
 	};
 
 	return (

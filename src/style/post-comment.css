@@ -90,6 +90,7 @@
     flex-direction: column;
     max-width: fit-content;
     gap: 1rem;
+    padding-bottom: .5rem;
 }
 
 #comment-form button {
@@ -129,6 +130,8 @@
 
 .comment-text {
     padding-bottom: 1rem;
+    white-space: pre-line;
+    line-break: anywhere;
 }
 
 .comment-sort button {
@@ -144,3 +147,4 @@
     padding-top: .3rem;
     padding-bottom: .3rem;
 }
+

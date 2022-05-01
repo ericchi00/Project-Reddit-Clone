@@ -48,7 +48,8 @@ const Comment = ({
 					setUpvoteActive(true);
 				}
 			});
-		} else if (downvote.length > 0) {
+		}
+		if (downvote.length > 0) {
 			downvote.forEach((vote) => {
 				if (vote === time) {
 					setUpvoteActive(false);

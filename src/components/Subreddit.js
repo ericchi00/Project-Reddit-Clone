@@ -103,7 +103,7 @@ const Subreddit = ({ currentUser, signedIn }) => {
 								title={post.data.title}
 								text={post.data.text}
 								docID={post.id}
-								key={i}
+								key={post.data.timestamp}
 								index={i + 1}
 							/>
 						);

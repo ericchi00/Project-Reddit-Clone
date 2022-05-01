@@ -301,7 +301,7 @@ const Post = ({
 							className="delete-post"
 							onClick={() => deletePost()}
 						>
-							Delete
+							Delete Post
 						</button>
 					) : null}
 				</div>

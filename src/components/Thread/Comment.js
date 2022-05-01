@@ -13,6 +13,8 @@ import {
 	getDoc,
 	deleteDoc,
 } from '@firebase/firestore';
+import { confirmAlert } from 'react-confirm-alert';
+import { unmountComponentAtNode } from 'react-dom';
 
 const Comment = ({
 	name,
@@ -23,7 +25,6 @@ const Comment = ({
 	currentUser,
 	subreddit,
 	postID,
-	removeComment,
 }) => {
 	const [updatedScore, setUpdatedScore] = useState(score);
 	// sets css class to show vote
@@ -240,29 +241,49 @@ const Comment = ({
 	};
 
 	const deleteComment = async () => {
-		const collectionRef = collection(
-			firestore,
-			`Subreddit/${subreddit}/posts/${postID}/comments`
-		);
-		const q = query(collectionRef);
-		const querySnapshot = await getDocs(q);
-		querySnapshot.forEach(async (item) => {
-			if (item.data().timestamp === time) {
-				await deleteDoc(
-					doc(
-						firestore,
-						'Subreddit',
-						`${subreddit}`,
-						'posts',
-						`${postID}`,
-						'comments',
-						item.id
-					)
-				);
-			}
+		confirmAlert({
+			title: 'Are you sure you want to delete your comment?',
+			buttons: [
+				{
+					label: 'No',
+					onClick: () => {
+						unmountComponentAtNode(
+							document.getElementById('react-confirm-alert')
+						);
+					},
+				},
+				{
+					label: 'Yes',
+					onClick: async () => {
+						const collectionRef = collection(
+							firestore,
+							`Subreddit/${subreddit}/posts/${postID}/comments`
+						);
+						const q = query(collectionRef);
+						const querySnapshot = await getDocs(q);
+						querySnapshot.forEach(async (item) => {
+							if (item.data().timestamp === time) {
+								await deleteDoc(
+									doc(
+										firestore,
+										'Subreddit',
+										`${subreddit}`,
+										'posts',
+										`${postID}`,
+										'comments',
+										item.id
+									)
+								);
+							}
+							window.location.href = `/r/${subreddit}/${postID}`;
+						});
+					},
+				},
+			],
+			closeOnEscape: true,
+			closeOnClickOutside: true,
+			keyCodeForClose: [8, 32],
 		});
-		//state from Thread, forces the thread to rerender to remove the comment
-		removeComment(true);
 	};
 
 	return (

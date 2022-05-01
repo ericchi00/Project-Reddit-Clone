@@ -15,9 +15,12 @@ import {
 	orderBy,
 	deleteDoc,
 } from '@firebase/firestore';
+import { confirmAlert } from 'react-confirm-alert';
 import { Link } from 'react-router-dom';
 import '../../style/post-comment.css';
+import '../../style/confirm-alert.css';
 import { formatDistanceToNow } from 'date-fns';
+import { unmountComponentAtNode } from 'react-dom';
 import Comment from './Comment';
 import CommentForm from './CommentForm';
 
@@ -33,8 +36,6 @@ const Thread = ({ currentUser, signedIn }) => {
 	const [updatedScore, setUpdatedScore] = useState(null);
 
 	const [sort, setSort] = useState('hot');
-	// state to pass down to comment
-	const [removeComment, setRemoveComment] = useState(false);
 	// sets css class to show vote
 	const [upvoteActive, setUpvoteActive] = useState(false);
 	const [downvoteActive, setDownvoteActive] = useState(false);
@@ -43,9 +44,8 @@ const Thread = ({ currentUser, signedIn }) => {
 		grabPostData();
 		grabComments(sort);
 		setNewComment(false);
-		setRemoveComment(false);
 		addVoteClassOnLoad();
-	}, [newComment, removeComment, sort, time]);
+	}, [newComment, sort, time]);
 
 	const commentHandler = (e) => {
 		const { value } = e.target;
@@ -320,26 +320,50 @@ const Thread = ({ currentUser, signedIn }) => {
 	};
 
 	const deletePost = async (e) => {
-		// removes all comments from post
-		const collectionRef = collection(
-			firestore,
-			`Subreddit/${subreddit}/posts/${postID}/comments`
-		);
-		const q = query(collectionRef);
-		const querySnapshot = await getDocs(q);
-		querySnapshot.forEach((item) => {
-			deleteDoc(
-				doc(
-					firestore,
-					`Subreddit/${subreddit}/posts/${postID}/comments/${item.id}`
-				)
-			);
-		});
+		confirmAlert({
+			title: 'Are you sure you want to delete this post?',
+			buttons: [
+				{
+					label: 'No',
+					onClick: () => {
+						unmountComponentAtNode(
+							document.getElementById('react-confirm-alert')
+						);
+					},
+				},
+				{
+					label: 'Yes',
+					onClick: async () => {
+						// removes all comments from post
+						const collectionRef = collection(
+							firestore,
+							`Subreddit/${subreddit}/posts/${postID}/comments`
+						);
+						const q = query(collectionRef);
+						const querySnapshot = await getDocs(q);
+						querySnapshot.forEach((item) => {
+							deleteDoc(
+								doc(
+									firestore,
+									`Subreddit/${subreddit}/posts/${postID}/comments/${item.id}`
+								)
+							);
+						});
 
-		// removes comments from post
-		const docRef = doc(firestore, `Subreddit/${subreddit}/posts/${postID}`);
-		await deleteDoc(docRef);
-		window.location.href = `/r/${subreddit}`;
+						// removes comments from post
+						const docRef = doc(
+							firestore,
+							`Subreddit/${subreddit}/posts/${postID}`
+						);
+						await deleteDoc(docRef);
+						window.location.href = `/r/${subreddit}`;
+					},
+				},
+			],
+			closeOnEscape: true,
+			closeOnClickOutside: true,
+			keyCodeForClose: [8, 32],
+		});
 	};
 
 	return (
@@ -396,7 +420,6 @@ const Thread = ({ currentUser, signedIn }) => {
 					{comments.map((comment, i) => {
 						return (
 							<Comment
-								removeComment={setRemoveComment}
 								postID={postID}
 								subreddit={subreddit}
 								currentUser={currentUser}

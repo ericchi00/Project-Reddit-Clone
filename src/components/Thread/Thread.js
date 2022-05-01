@@ -13,6 +13,7 @@ import {
 	getDoc,
 	addDoc,
 	orderBy,
+	deleteDoc,
 } from '@firebase/firestore';
 import { Link } from 'react-router-dom';
 import '../../style/post-comment.css';
@@ -318,6 +319,29 @@ const Thread = ({ currentUser, signedIn }) => {
 		setSort(value);
 	};
 
+	const deletePost = async (e) => {
+		// removes all comments from post
+		const collectionRef = collection(
+			firestore,
+			`Subreddit/${subreddit}/posts/${postID}/comments`
+		);
+		const q = query(collectionRef);
+		const querySnapshot = await getDocs(q);
+		querySnapshot.forEach((item) => {
+			deleteDoc(
+				doc(
+					firestore,
+					`Subreddit/${subreddit}/posts/${postID}/comments/${item.id}`
+				)
+			);
+		});
+
+		// removes comments from post
+		const docRef = doc(firestore, `Subreddit/${subreddit}/posts/${postID}`);
+		await deleteDoc(docRef);
+		window.location.href = `/r/${subreddit}`;
+	};
+
 	return (
 		<div className="post-comment">
 			<Link to={`/r/${subreddit}`}>
@@ -339,7 +363,12 @@ const Thread = ({ currentUser, signedIn }) => {
 					<div className="thread-title">{postInfo.title}</div>
 					<div className="post-submitter">
 						Submitted by {postInfo.name}{' '}
-						{formatDistanceToNow(postInfo.time, { includeSeconds: true })} ago
+						{formatDistanceToNow(postInfo.time, { includeSeconds: true })} ago{' '}
+						{postInfo.name === currentUser ? (
+							<button type="button" onClick={(e) => deletePost(e)}>
+								Delete Post
+							</button>
+						) : null}
 					</div>
 					<div className="post-text">
 						<p>{postInfo.text}</p>

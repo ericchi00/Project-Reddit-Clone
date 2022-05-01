@@ -6,6 +6,8 @@ Create a clone of a social media site for my final project to show off all of my
 
 HTML, CSS, Javascript, React, Firebase, Date-FNS(time formatting)
 
+React Confirm Alert
+
 ## Features
 
 Create Subreddits

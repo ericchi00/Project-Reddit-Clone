@@ -1,6 +1,7 @@
 import { collection, getDocs, getFirestore } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import Post from './Post';
+import '../style/loader.css';
 
 const Homepage = ({ signedIn, currentUser }) => {
 	const [posts, setPosts] = useState([]);
@@ -49,7 +50,21 @@ const Homepage = ({ signedIn, currentUser }) => {
 			<ul>
 				<div className="home">Homepage</div>
 				{loading ? (
-					<div className="loading">homepage is loading data</div>
+					<div className="lds-spinner">
+						Loading
+						<div></div>
+						<div></div>
+						<div></div>
+						<div></div>
+						<div></div>
+						<div></div>
+						<div></div>
+						<div></div>
+						<div></div>
+						<div></div>
+						<div></div>
+						<div></div>
+					</div>
 				) : (
 					posts.map((post, i) => {
 						return (

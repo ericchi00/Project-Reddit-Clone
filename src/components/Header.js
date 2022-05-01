@@ -13,7 +13,7 @@ const Header = ({ username, signedIn, login, signout }) => {
 								<img src={bot} alt="Bot Logo" />
 							</Link>
 							<Link to="/">
-								<p>reddit</p>
+								<p>reddit clone</p>
 							</Link>
 						</li>
 					</div>

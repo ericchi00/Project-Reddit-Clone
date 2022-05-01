@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import { Link } from 'react-router-dom';
 import { useParams } from 'react-router';
-import up from '../images/arrow-single-up.svg';
-import down from '../images/arrow-single-down.svg';
 import {
 	collection,
 	doc,
@@ -34,6 +32,8 @@ const Post = ({
 	const firestore = getFirestore();
 	const [updatedScore, setUpdatedScore] = useState(score);
 	const [subredditName, setSubredditName] = useState(subreddit);
+	const [upvoteActive, setUpvoteActive] = useState(false);
+	const [downvoteActive, setDownvoteActive] = useState(false);
 
 	useEffect(() => {
 		// updates posts score after clicking on a different subreddit
@@ -44,7 +44,32 @@ const Post = ({
 		} else if (sub === undefined) {
 			setSubredditName(subreddit);
 		}
+		addVoteClassOnLoad();
 	}, [score]);
+
+	const addVoteClassOnLoad = async () => {
+		if (!signedIn) return;
+		const docRef = doc(firestore, 'UserLikes', currentUser);
+		const docSnap = await getDoc(docRef);
+		const upvote = docSnap.data().upvotes;
+		const downvote = docSnap.data().downvotes;
+		if (upvote.length > 0) {
+			upvote.forEach((vote) => {
+				if (vote === time) {
+					setUpvoteActive(true);
+					setDownvoteActive(false);
+				}
+			});
+		}
+		if (downvote.length > 0) {
+			downvote.forEach((vote) => {
+				if (vote === time) {
+					setDownvoteActive(true);
+					setUpvoteActive(false);
+				}
+			});
+		}
+	};
 
 	const upVote = async () => {
 		if (!signedIn) {
@@ -56,8 +81,6 @@ const Post = ({
 			alert("You can't vote on your own post.");
 			return;
 		}
-
-		console.log(subredditName);
 
 		const docRef = doc(firestore, 'UserLikes', currentUser);
 		const docSnap = await getDoc(docRef);
@@ -85,6 +108,7 @@ const Post = ({
 						upvotes: arrayRemove(time),
 					});
 					setUpdatedScore(item.data().score - 1);
+					setUpvoteActive(false);
 					return;
 				}
 			}
@@ -104,6 +128,8 @@ const Post = ({
 						downvotes: arrayRemove(time),
 					});
 					setUpdatedScore(item.data().score + 2);
+					setUpvoteActive(true);
+					setDownvoteActive(false);
 					return;
 				}
 			}
@@ -120,6 +146,7 @@ const Post = ({
 					upvotes: arrayUnion(time),
 					downvotes: arrayRemove(time),
 				});
+				setUpvoteActive(true);
 				setUpdatedScore(item.data().score + 1);
 			}
 		});
@@ -162,6 +189,7 @@ const Post = ({
 						downvotes: arrayRemove(time),
 					});
 					setUpdatedScore(item.data().score + 1);
+					setDownvoteActive(false);
 					return;
 				}
 			}
@@ -181,6 +209,8 @@ const Post = ({
 						downvotes: arrayUnion(time),
 					});
 					setUpdatedScore(item.data().score - 2);
+					setDownvoteActive(true);
+					setUpvoteActive(false);
 					return;
 				}
 			}
@@ -198,6 +228,7 @@ const Post = ({
 					downvotes: arrayUnion(time),
 				});
 				setUpdatedScore(item.data().score - 1);
+				setDownvoteActive(true);
 			}
 		});
 	};
@@ -230,9 +261,15 @@ const Post = ({
 			<div className="post-index">{index}</div>
 			<div className="score-wrapper">
 				<div className="upvote-downvote">
-					<img src={up} alt="upvote arrow" onClick={() => upVote()} />
+					<div
+						className={upvoteActive ? 'arrow up active' : 'arrow up'}
+						onClick={() => upVote()}
+					></div>
 					<span className="post-score">{updatedScore}</span>
-					<img src={down} alt="downvote arrow" onClick={() => downVote()} />
+					<div
+						className={downvoteActive ? 'arrow down active' : 'arrow down'}
+						onClick={() => downVote()}
+					></div>
 				</div>
 			</div>
 			<div className="posts-wrapper">

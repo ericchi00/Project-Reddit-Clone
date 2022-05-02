@@ -36,7 +36,7 @@ const App = () => {
 				const checkIfExists = await getDoc(userFile);
 				if (!checkIfExists.exists()) {
 					await setDoc(doc(firestore, 'UserLikes', name), {
-						name: user.displayName,
+						name: name,
 						downvotes: [],
 						upvotes: [],
 					});

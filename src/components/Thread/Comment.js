@@ -275,7 +275,11 @@ const Comment = ({
 									)
 								);
 							}
-							window.location.href = `/r/${subreddit}/${postID}`;
+							// set timeout to wait for comment to be deleted first
+							setTimeout(
+								(window.location.href = `/r/${subreddit}/${postID}`),
+								500
+							);
 						});
 					},
 				},

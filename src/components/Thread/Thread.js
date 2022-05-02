@@ -132,12 +132,6 @@ const Thread = ({ currentUser, signedIn }) => {
 			alert('You must be signed in to vote.');
 			return;
 		}
-
-		if (currentUser === postInfo.name) {
-			alert("You can't vote on your own post.");
-			return;
-		}
-
 		const docRef = doc(firestore, 'UserLikes', currentUser);
 		const docSnap = await getDoc(docRef);
 		const upvote = docSnap.data().upvotes;
@@ -210,12 +204,6 @@ const Thread = ({ currentUser, signedIn }) => {
 			alert('You must be signed in to vote.');
 			return;
 		}
-
-		if (currentUser === postInfo.name) {
-			alert("You can't vote on your own post.");
-			return;
-		}
-
 		const docRef = doc(firestore, 'UserLikes', currentUser);
 		const docSnap = await getDoc(docRef);
 		const upvote = docSnap.data().upvotes;
@@ -419,7 +407,16 @@ const Thread = ({ currentUser, signedIn }) => {
 								</button>{' '}
 								<button type="button" onClick={() => editPost()}>
 									Edit Post
-								</button>
+								</button>{' '}
+								{editable ? (
+									<button
+										type="button"
+										className="submit-edit"
+										onClick={() => submitEdit()}
+									>
+										Submit Edit
+									</button>
+								) : null}
 							</>
 						) : null}
 					</div>
@@ -432,11 +429,6 @@ const Thread = ({ currentUser, signedIn }) => {
 							{postInfo.text}
 						</div>
 					</div>
-					{editable ? (
-						<button type="button" onClick={() => submitEdit()}>
-							Submit Edit
-						</button>
-					) : null}
 				</div>
 			</div>
 			<Sort sortHandler={sortHandler} />

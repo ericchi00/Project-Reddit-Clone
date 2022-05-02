@@ -137,6 +137,16 @@
     line-break: anywhere;
 }
 
+.post-text div {
+    white-space: pre-line;
+    line-break: anywhere;
+}
+
+.comment-text {
+    white-space: pre-line;
+    line-break: anywhere;
+}
+
 .comment-sort button {
     width: 50px;
 }
@@ -152,5 +162,9 @@
 }
 
 .edit {
+    -webkit-appearance: textarea;
+}
+
+.comment-text.edit {
     -webkit-appearance: textarea;
 }

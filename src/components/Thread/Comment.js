@@ -30,6 +30,8 @@ const Comment = ({
 	// sets css class to show vote
 	const [upvoteActive, setUpvoteActive] = useState(false);
 	const [downvoteActive, setDownvoteActive] = useState(false);
+	const [edit, setEdit] = useState(false);
+
 	const firestore = getFirestore();
 
 	useEffect(() => {
@@ -274,12 +276,12 @@ const Comment = ({
 										item.id
 									)
 								);
+								// // set timeout to wait for comment to be deleted first
+								setTimeout(
+									(window.location.href = `/r/${subreddit}/${postID}`),
+									500
+								);
 							}
-							// set timeout to wait for comment to be deleted first
-							setTimeout(
-								(window.location.href = `/r/${subreddit}/${postID}`),
-								500
-							);
 						});
 					},
 				},
@@ -287,6 +289,35 @@ const Comment = ({
 			closeOnEscape: true,
 			closeOnClickOutside: true,
 			keyCodeForClose: [8, 32],
+		});
+	};
+
+	const submitEdit = async (e) => {
+		const updatedComment = e.currentTarget
+			.closest('.comment')
+			.querySelector('.comment-text.edit').innerText;
+		if (updatedComment.length <= 1) {
+			alert('Comment must be more than one character');
+			return;
+		}
+		const collectionRef = collection(
+			firestore,
+			`Subreddit/${subreddit}/posts/${postID}/comments`
+		);
+		const q = query(collectionRef);
+		const querySnapshot = await getDocs(q);
+		querySnapshot.forEach(async (item) => {
+			if (item.data().timestamp === time) {
+				await updateDoc(
+					doc(
+						firestore,
+						`Subreddit/${subreddit}/posts/${postID}/comments/${item.id}`
+					),
+					{ text: updatedComment }
+				);
+				// set timeout to provide UI feedback that comment was updated
+				setTimeout((window.location.href = `/r/${subreddit}/${postID}`), 500);
+			}
 		});
 	};
 
@@ -310,16 +341,32 @@ const Comment = ({
 						{formatDistanceToNow(time, { includeSeconds: true })} ago
 					</div>
 					{currentUser === name ? (
-						<button
-							type="button"
-							className="delete-comment"
-							onClick={() => deleteComment()}
-						>
-							Delete
-						</button>
+						<>
+							<button
+								type="button"
+								className="delete-comment"
+								onClick={() => deleteComment()}
+							>
+								Delete
+							</button>
+							<button type="button" onClick={() => setEdit(true)}>
+								Edit Comment
+							</button>
+							{edit ? (
+								<button type="button" onClick={(e) => submitEdit(e)}>
+									Submit Edit
+								</button>
+							) : null}
+						</>
 					) : null}
 				</div>
-				<div className="comment-text">{text}</div>
+				<div
+					className={edit ? 'comment-text edit' : 'comment-text'}
+					contentEditable={edit}
+					suppressContentEditableWarning={true}
+				>
+					{text}
+				</div>
 			</div>
 		</div>
 	);

@@ -31,8 +31,9 @@ const Thread = ({ currentUser, signedIn }) => {
 	const [newComment, setNewComment] = useState(null);
 	const [postInfo, setPostInfo] = useState({ time: 0 });
 	const [time, setTime] = useState(null);
+	const [editable, setEditable] = useState(false);
 
-	const [commentText, setCommentText] = useState('');
+	const [commentText, setCommentText] = useState(null);
 	const [updatedScore, setUpdatedScore] = useState(null);
 
 	const [sort, setSort] = useState('hot');
@@ -288,8 +289,9 @@ const Thread = ({ currentUser, signedIn }) => {
 			alert('You must be signed in to comment.');
 			return;
 		}
+		const comment = document.getElementById('comment');
+		comment.placeholder = 'Comment needs be longer than 1 character.';
 		if (commentText <= 1) {
-			const comment = document.getElementById('comment');
 			comment.placeholder = 'Comment needs be longer than 1 character.';
 			return;
 		}
@@ -311,6 +313,8 @@ const Thread = ({ currentUser, signedIn }) => {
 		);
 		const form = document.getElementById('comment-form');
 		form.reset();
+		setCommentText(null);
+		comment.placeholder = 'Enter a comment';
 		setNewComment(true);
 	};
 
@@ -366,6 +370,26 @@ const Thread = ({ currentUser, signedIn }) => {
 		});
 	};
 
+	const editPost = () => {
+		setEditable(true);
+	};
+
+	const submitEdit = async () => {
+		const newText = document
+			.querySelector('.post-text')
+			.querySelector('div').innerText;
+		if (newText.length <= 1) {
+			alert('Post must be greater than one character');
+			return;
+		}
+		await updateDoc(
+			doc(firestore, 'Subreddit', `${subreddit}`, 'posts', `${postID}`),
+			{ text: newText }
+		);
+		// provides UI feedback that the edit was saved
+		window.location.href = `/r/${subreddit}/${postID}`;
+	};
+
 	return (
 		<div className="post-comment">
 			<Link to={`/r/${subreddit}`}>
@@ -389,14 +413,30 @@ const Thread = ({ currentUser, signedIn }) => {
 						Submitted by {postInfo.name}{' '}
 						{formatDistanceToNow(postInfo.time, { includeSeconds: true })} ago{' '}
 						{postInfo.name === currentUser ? (
-							<button type="button" onClick={(e) => deletePost(e)}>
-								Delete Post
-							</button>
+							<>
+								<button type="button" onClick={(e) => deletePost(e)}>
+									Delete Post
+								</button>{' '}
+								<button type="button" onClick={() => editPost()}>
+									Edit Post
+								</button>
+							</>
 						) : null}
 					</div>
 					<div className="post-text">
-						<p>{postInfo.text}</p>
+						<div
+							className={editable ? 'edit' : null}
+							contentEditable={editable}
+							suppressContentEditableWarning={true}
+						>
+							{postInfo.text}
+						</div>
 					</div>
+					{editable ? (
+						<button type="button" onClick={() => submitEdit()}>
+							Submit Edit
+						</button>
+					) : null}
 				</div>
 			</div>
 			<div className="comment-sort">
@@ -429,7 +469,6 @@ const Thread = ({ currentUser, signedIn }) => {
 								score={comment.score}
 								text={comment.text}
 								time={comment.timestamp}
-								addVoteClassOnLoad={addVoteClassOnLoad}
 							/>
 						);
 					})}

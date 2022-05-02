@@ -26,13 +26,22 @@ const App = () => {
 		onAuthStateChanged(auth, async (user) => {
 			if (user) {
 				setSignedIn(true);
-				setUserName(user.displayName);
-				const userFile = doc(firestore, 'UserLikes', user.displayName);
+				setUserName(user.displayName.toLowerCase());
+				const userFile = doc(
+					firestore,
+					'UserLikes',
+					user.displayName.toLowerCase()
+				);
 				const checkIfExists = await getDoc(userFile);
 				if (!checkIfExists.exists()) {
-					await setDoc(doc(firestore, 'UserLikes', user.displayName), {
-						name: user.displayName,
-					});
+					await setDoc(
+						doc(firestore, 'UserLikes', user.displayName.toLowerCase()),
+						{
+							name: user.displayName,
+							downvotes: [],
+							upvotes: [],
+						}
+					);
 				} else return;
 			} else return;
 		});
@@ -44,7 +53,13 @@ const App = () => {
 			const errorMessage = error.message;
 			const email = error.email;
 			const credential = GoogleAuthProvider.credentialFromError(error);
-			console.log(errorCode, errorMessage, email, credential);
+			alert(
+				errorCode,
+				errorMessage,
+				email,
+				credential,
+				'has occurred. Please try agin'
+			);
 		});
 	};
 

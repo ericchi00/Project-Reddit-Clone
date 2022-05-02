@@ -16,6 +16,7 @@ const Subreddit = ({ currentUser, signedIn }) => {
 	const [createPost, setCreatePost] = useState(false);
 	const [title, setTitle] = useState('');
 	const [text, setText] = useState('');
+	//default sort is hot
 	const [sort, setSort] = useState('hot');
 	const { subreddit } = useParams();
 
@@ -32,7 +33,6 @@ const Subreddit = ({ currentUser, signedIn }) => {
 		let postsArr = [];
 		const firestore = getFirestore();
 		const collectionRef = collection(firestore, `Subreddit/${subreddit}/posts`);
-		// sorts by newest on bottom first, oldest on top
 		if (expr === 'hot') {
 			const q = query(collectionRef, orderBy('score', 'desc'));
 			const querySnapshot = await getDocs(q);

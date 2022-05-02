@@ -278,9 +278,9 @@ const Thread = ({ currentUser, signedIn }) => {
 			return;
 		}
 		const comment = document.getElementById('comment');
-		comment.placeholder = 'Comment needs be longer than 1 character.';
+		comment.placeholder = 'Comment needs to be longer than 1 character.';
 		if (commentText <= 1) {
-			comment.placeholder = 'Comment needs be longer than 1 character.';
+			comment.placeholder = 'Comment needs to be longer than 1 character.';
 			return;
 		}
 		await addDoc(

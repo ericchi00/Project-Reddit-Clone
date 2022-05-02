@@ -43,8 +43,8 @@ const Thread = ({ currentUser, signedIn }) => {
 	const [downvoteActive, setDownvoteActive] = useState(false);
 
 	useEffect(() => {
-		grabPostData();
-		grabComments(sort);
+		getPostData();
+		getComments(sort);
 		setNewComment(false);
 		addVoteClassOnLoad();
 	}, [newComment, sort, time]);
@@ -54,7 +54,7 @@ const Thread = ({ currentUser, signedIn }) => {
 		setCommentText(value);
 	};
 
-	const grabPostData = async () => {
+	const getPostData = async () => {
 		try {
 			const collectionRef = collection(
 				firestore,
@@ -80,7 +80,7 @@ const Thread = ({ currentUser, signedIn }) => {
 		}
 	};
 
-	const grabComments = async (expr) => {
+	const getComments = async (expr) => {
 		let commentsArr = [];
 		const collectionRef = collection(
 			firestore,

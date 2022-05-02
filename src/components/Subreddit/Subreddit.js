@@ -8,7 +8,8 @@ import {
 } from '@firebase/firestore';
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router';
-import Post from './Post';
+import Post from '../../components/Post';
+import PostForm from './PostForm';
 
 const Subreddit = ({ currentUser, signedIn }) => {
 	const [posts, setPosts] = useState([]);
@@ -120,45 +121,12 @@ const Subreddit = ({ currentUser, signedIn }) => {
 				Create a new post!
 			</button>
 			{createPost ? (
-				<form id="create-post-form">
-					<fieldset>
-						<legend>New Post</legend>
-						<label htmlFor="title">Title*: </label>
-						<input
-							type="text"
-							name="title"
-							id="title"
-							onChange={(e) => titleHandler(e)}
-							required
-						/>
-						<label htmlFor="text">Text*: </label>
-						<textarea
-							id="text"
-							name="text"
-							rows="4"
-							cols="50"
-							onChange={(e) => textHandler(e)}
-							required
-						/>
-					</fieldset>
-					<div className="submit-wrapper">
-						<button
-							className="close-form"
-							onClick={() => {
-								setCreatePost(false);
-							}}
-						>
-							Close
-						</button>
-						<button
-							type="submit"
-							className="new-post-submit"
-							onClick={(e) => addPosts(e)}
-						>
-							Submit
-						</button>
-					</div>
-				</form>
+				<PostForm
+					titleHandler={titleHandler}
+					textHandler={textHandler}
+					setCreatePost={setCreatePost}
+					addPosts={addPosts}
+				/>
 			) : null}
 		</div>
 	);

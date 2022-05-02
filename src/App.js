@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
 import SubredditList from './components/SubredditList';
-import Subreddit from './components/Subreddit';
+import Subreddit from './components/Subreddit/Subreddit';
 import Homepage from './components/Homepage';
 import {
 	getAuth,

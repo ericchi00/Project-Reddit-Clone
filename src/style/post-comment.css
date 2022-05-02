@@ -130,6 +130,9 @@
 
 .comment-text {
     padding-bottom: 1rem;
+}
+
+.post-text p {
     white-space: pre-line;
     line-break: anywhere;
 }
@@ -148,3 +151,6 @@
     padding-bottom: .3rem;
 }
 
+.edit {
+    -webkit-appearance: textarea;
+}

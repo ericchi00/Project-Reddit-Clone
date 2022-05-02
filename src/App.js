@@ -26,7 +26,8 @@ const App = () => {
 		onAuthStateChanged(auth, async (user) => {
 			if (user) {
 				setSignedIn(true);
-				setUserName(user.displayName.toLowerCase());
+				const name = user.displayName.toLowerCase();
+				setUserName(name);
 				const userFile = doc(
 					firestore,
 					'UserLikes',
@@ -34,14 +35,11 @@ const App = () => {
 				);
 				const checkIfExists = await getDoc(userFile);
 				if (!checkIfExists.exists()) {
-					await setDoc(
-						doc(firestore, 'UserLikes', user.displayName.toLowerCase()),
-						{
-							name: user.displayName,
-							downvotes: [],
-							upvotes: [],
-						}
-					);
+					await setDoc(doc(firestore, 'UserLikes', name), {
+						name: user.displayName,
+						downvotes: [],
+						upvotes: [],
+					});
 				} else return;
 			} else return;
 		});

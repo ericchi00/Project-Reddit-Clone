@@ -132,11 +132,6 @@
     padding-bottom: 1rem;
 }
 
-.post-text p {
-    white-space: pre-line;
-    line-break: anywhere;
-}
-
 .post-text div {
     white-space: pre-line;
     line-break: anywhere;
@@ -151,7 +146,7 @@
     width: 50px;
 }
 
-.delete-comment {
+.comment-info button {
     font-size: smaller;
 }
 

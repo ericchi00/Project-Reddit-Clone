@@ -23,6 +23,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { unmountComponentAtNode } from 'react-dom';
 import Comment from './Comment';
 import CommentForm from './CommentForm';
+import Sort from './Sort';
 
 const Thread = ({ currentUser, signedIn }) => {
 	const { subreddit, postID } = useParams();
@@ -81,7 +82,6 @@ const Thread = ({ currentUser, signedIn }) => {
 
 	const grabComments = async (expr) => {
 		let commentsArr = [];
-		const firestore = getFirestore();
 		const collectionRef = collection(
 			firestore,
 			`Subreddit/${subreddit}/posts`,
@@ -439,13 +439,7 @@ const Thread = ({ currentUser, signedIn }) => {
 					) : null}
 				</div>
 			</div>
-			<div className="comment-sort">
-				<label htmlFor="sort">sorted by: </label>
-				<select name="sort" id="sort" onChange={(e) => sortHandler(e)}>
-					<option value="hot">Hot</option>
-					<option value="new">New</option>
-				</select>
-			</div>
+			<Sort sortHandler={sortHandler} />
 			<div className="comment-name">Speaking as : {currentUser}</div>
 			<CommentForm
 				commentHandler={commentHandler}
@@ -464,7 +458,7 @@ const Thread = ({ currentUser, signedIn }) => {
 								subreddit={subreddit}
 								currentUser={currentUser}
 								signedIn={signedIn}
-								key={i}
+								key={comment.timestamp}
 								name={comment.name}
 								score={comment.score}
 								text={comment.text}

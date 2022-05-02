@@ -65,6 +65,7 @@ const App = () => {
 		signOut(auth)
 			.then(() => {
 				setSignedIn(false);
+				document.location.reload();
 			})
 			.catch((error) => {
 				alert(error, 'Please try again!');

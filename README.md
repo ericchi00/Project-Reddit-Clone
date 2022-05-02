@@ -27,3 +27,5 @@ Delete posts and comments
 Sets upvote/downvote color if already voted on
 
 Opens a confirm alert if you try to delete a post or comment
+
+Users can edit their own posts or comments 

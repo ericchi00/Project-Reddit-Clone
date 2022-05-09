@@ -25,7 +25,7 @@ import Comment from './Comment';
 import CommentForm from './CommentForm';
 import Sort from './Sort';
 
-const Thread = ({ currentUser, signedIn }) => {
+const Thread = ({ currentUser, signedIn, uid }) => {
 	const { subreddit, postID } = useParams();
 	const firestore = getFirestore();
 	const [comments, setComments] = useState([]);
@@ -70,6 +70,7 @@ const Thread = ({ currentUser, signedIn }) => {
 						title: item.data().title,
 						text: item.data().text,
 						name: item.data().name,
+						uid: item.data().uid,
 					});
 					setUpdatedScore(item.data().score);
 					setTime(item.data().timestamp);
@@ -108,7 +109,7 @@ const Thread = ({ currentUser, signedIn }) => {
 	const addVoteClassOnLoad = async () => {
 		if (!signedIn) return;
 		try {
-			const docRef = doc(firestore, 'UserLikes', currentUser);
+			const docRef = doc(firestore, 'UserLikes', uid);
 			const docSnap = await getDoc(docRef);
 			const upvote = docSnap.data().upvotes;
 			const downvote = docSnap.data().downvotes;
@@ -139,7 +140,7 @@ const Thread = ({ currentUser, signedIn }) => {
 			return;
 		}
 		try {
-			const docRef = doc(firestore, 'UserLikes', currentUser);
+			const docRef = doc(firestore, 'UserLikes', uid);
 			const docSnap = await getDoc(docRef);
 			const upvote = docSnap.data().upvotes;
 			const downvote = docSnap.data().downvotes;
@@ -161,7 +162,7 @@ const Thread = ({ currentUser, signedIn }) => {
 								score: increment(-1),
 							}
 						);
-						await updateDoc(doc(firestore, `UserLikes/${currentUser}`), {
+						await updateDoc(doc(firestore, `UserLikes/${uid}`), {
 							upvotes: arrayRemove(postInfo.time),
 						});
 						setUpdatedScore(item.data().score - 1);
@@ -182,7 +183,7 @@ const Thread = ({ currentUser, signedIn }) => {
 								score: increment(2),
 							}
 						);
-						await updateDoc(doc(firestore, `UserLikes/${currentUser}`), {
+						await updateDoc(doc(firestore, `UserLikes/${uid}`), {
 							upvotes: arrayUnion(postInfo.time),
 							downvotes: arrayRemove(postInfo.time),
 						});
@@ -201,7 +202,7 @@ const Thread = ({ currentUser, signedIn }) => {
 							score: increment(1),
 						}
 					);
-					await updateDoc(doc(firestore, `UserLikes/${currentUser}`), {
+					await updateDoc(doc(firestore, `UserLikes/${uid}`), {
 						upvotes: arrayUnion(postInfo.time),
 						downvotes: arrayRemove(postInfo.time),
 					});
@@ -221,7 +222,7 @@ const Thread = ({ currentUser, signedIn }) => {
 			return;
 		}
 		try {
-			const docRef = doc(firestore, 'UserLikes', currentUser);
+			const docRef = doc(firestore, 'UserLikes', uid);
 			const docSnap = await getDoc(docRef);
 			const upvote = docSnap.data().upvotes;
 			const downvote = docSnap.data().downvotes;
@@ -245,7 +246,7 @@ const Thread = ({ currentUser, signedIn }) => {
 								score: increment(1),
 							}
 						);
-						await updateDoc(doc(firestore, `UserLikes/${currentUser}`), {
+						await updateDoc(doc(firestore, `UserLikes/${uid}`), {
 							downvotes: arrayRemove(postInfo.time),
 						});
 						setUpdatedScore(item.data().score + 1);
@@ -264,7 +265,7 @@ const Thread = ({ currentUser, signedIn }) => {
 								score: increment(-2),
 							}
 						);
-						await updateDoc(doc(firestore, `UserLikes/${currentUser}`), {
+						await updateDoc(doc(firestore, `UserLikes/${uid}`), {
 							upvotes: arrayRemove(postInfo.time),
 							downvotes: arrayUnion(postInfo.time),
 						});
@@ -283,7 +284,7 @@ const Thread = ({ currentUser, signedIn }) => {
 							score: increment(-1),
 						}
 					);
-					await updateDoc(doc(firestore, `UserLikes/${currentUser}`), {
+					await updateDoc(doc(firestore, `UserLikes/${uid}`), {
 						upvotes: arrayRemove(postInfo.time),
 						downvotes: arrayUnion(postInfo.time),
 					});
@@ -320,6 +321,7 @@ const Thread = ({ currentUser, signedIn }) => {
 					'comments'
 				),
 				{
+					uid: uid,
 					name: currentUser,
 					score: 1,
 					text: commentText,
@@ -383,6 +385,7 @@ const Thread = ({ currentUser, signedIn }) => {
 							window.location.href = `/r/${subreddit}`;
 						} catch (error) {
 							console.error(error);
+							alert(error, 'has occurred. Please reload page.');
 							return;
 						}
 					},
@@ -415,6 +418,7 @@ const Thread = ({ currentUser, signedIn }) => {
 			window.location.href = `/r/${subreddit}/${postID}`;
 		} catch (error) {
 			console.error(error);
+			alert(error, 'has occurred. Please reload page.');
 			return;
 		}
 	};
@@ -441,7 +445,7 @@ const Thread = ({ currentUser, signedIn }) => {
 					<div className="post-submitter">
 						Submitted by {postInfo.name}{' '}
 						{formatDistanceToNow(postInfo.time, { includeSeconds: true })} ago{' '}
-						{postInfo.name === currentUser ? (
+						{postInfo.uid === uid ? (
 							<>
 								<button type="button" onClick={(e) => deletePost(e)}>
 									Delete Post
@@ -487,6 +491,7 @@ const Thread = ({ currentUser, signedIn }) => {
 					{comments.map((comment, i) => {
 						return (
 							<Comment
+								uid={uid}
 								postID={postID}
 								subreddit={subreddit}
 								currentUser={currentUser}
@@ -496,6 +501,7 @@ const Thread = ({ currentUser, signedIn }) => {
 								score={comment.score}
 								text={comment.text}
 								time={comment.timestamp}
+								commentUID={comment.uid}
 							/>
 						);
 					})}

@@ -11,7 +11,7 @@ import { useParams } from 'react-router';
 import Post from '../../components/Post';
 import PostForm from './PostForm';
 
-const Subreddit = ({ currentUser, signedIn }) => {
+const Subreddit = ({ currentUser, signedIn, uid }) => {
 	const [posts, setPosts] = useState([]);
 	const [createPost, setCreatePost] = useState(false);
 	const [title, setTitle] = useState('');
@@ -69,6 +69,7 @@ const Subreddit = ({ currentUser, signedIn }) => {
 			if (title.length <= 0 && text.length <= 0) return;
 			const firestore = getFirestore();
 			await addDoc(collection(firestore, `Subreddit/${subreddit}/posts`), {
+				uid: uid,
 				title: title,
 				name: currentUser,
 				score: 1,
@@ -100,6 +101,8 @@ const Subreddit = ({ currentUser, signedIn }) => {
 					{posts.map((post, i) => {
 						return (
 							<Post
+								uid={uid}
+								postUID={post.data.uid}
 								removePost={setRemovePost}
 								currentUser={currentUser}
 								signedIn={signedIn}

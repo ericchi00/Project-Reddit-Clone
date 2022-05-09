@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import Post from './Post';
 import '../style/loader.css';
 
-const Homepage = ({ signedIn, currentUser }) => {
+const Homepage = ({ signedIn, currentUser, uid }) => {
 	const [posts, setPosts] = useState([]);
 	const [removePost, setRemovePost] = useState(null);
 	const [loading, setLoading] = useState(true);
@@ -70,6 +70,8 @@ const Homepage = ({ signedIn, currentUser }) => {
 					posts.map((post, i) => {
 						return (
 							<Post
+								uid={uid}
+								postUID={post.data.uid}
 								removePost={setRemovePost}
 								currentUser={currentUser}
 								signedIn={signedIn}

@@ -18,6 +18,7 @@ import Thread from './components/Thread/Thread';
 const App = () => {
 	const [signedIn, setSignedIn] = useState(false);
 	const [username, setUserName] = useState('');
+	const [uid, setUID] = useState('');
 	const firestore = getFirestore();
 	const provider = new GoogleAuthProvider();
 	const auth = getAuth();
@@ -27,15 +28,13 @@ const App = () => {
 			if (user) {
 				setSignedIn(true);
 				const name = user.displayName.toLowerCase();
+				setUID(user.uid);
 				setUserName(name);
-				const userFile = doc(
-					firestore,
-					'UserLikes',
-					user.displayName.toLowerCase()
-				);
-				const checkIfExists = await getDoc(userFile);
+				const userDocument = doc(firestore, 'UserLikes', user.uid);
+				const checkIfExists = await getDoc(userDocument);
 				if (!checkIfExists.exists()) {
-					await setDoc(doc(firestore, 'UserLikes', name), {
+					await setDoc(doc(firestore, 'UserLikes', user.uid), {
+						uid: uid,
 						name: name,
 						downvotes: [],
 						upvotes: [],
@@ -84,15 +83,21 @@ const App = () => {
 			<Routes>
 				<Route
 					path="/"
-					element={<Homepage signedIn={signedIn} currentUser={username} />}
+					element={
+						<Homepage signedIn={signedIn} currentUser={username} uid={uid} />
+					}
 				/>
 				<Route
 					path="/r/:subreddit"
-					element={<Subreddit currentUser={username} signedIn={signedIn} />}
+					element={
+						<Subreddit currentUser={username} signedIn={signedIn} uid={uid} />
+					}
 				/>
 				<Route
 					path="/r/:subreddit/:postID"
-					element={<Thread currentUser={username} signedIn={signedIn} />}
+					element={
+						<Thread currentUser={username} signedIn={signedIn} uid={uid} />
+					}
 				/>
 			</Routes>
 		</BrowserRouter>

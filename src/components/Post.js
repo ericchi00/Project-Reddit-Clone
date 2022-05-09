@@ -29,6 +29,8 @@ const Post = ({
 	currentUser,
 	sub,
 	removePost,
+	uid,
+	postUID,
 }) => {
 	const { subreddit } = useParams();
 	const firestore = getFirestore();
@@ -52,7 +54,7 @@ const Post = ({
 	const addVoteClassOnLoad = async () => {
 		try {
 			if (!signedIn) return;
-			const docRef = doc(firestore, 'UserLikes', currentUser);
+			const docRef = doc(firestore, 'UserLikes', uid);
 			const docSnap = await getDoc(docRef);
 			const upvote = docSnap.data().upvotes;
 			const downvote = docSnap.data().downvotes;
@@ -74,6 +76,7 @@ const Post = ({
 			}
 		} catch (error) {
 			console.error(error);
+			alert(error, 'has occurred. Please reload page.');
 			return;
 		}
 	};
@@ -84,7 +87,7 @@ const Post = ({
 			return;
 		}
 		try {
-			const docRef = doc(firestore, 'UserLikes', currentUser);
+			const docRef = doc(firestore, 'UserLikes', uid);
 			const docSnap = await getDoc(docRef);
 			const upvote = docSnap.data().upvotes;
 			const downvote = docSnap.data().downvotes;
@@ -106,7 +109,7 @@ const Post = ({
 								score: increment(-1),
 							}
 						);
-						await updateDoc(doc(firestore, `UserLikes/${currentUser}`), {
+						await updateDoc(doc(firestore, `UserLikes/${uid}`), {
 							upvotes: arrayRemove(time),
 						});
 						setUpdatedScore(item.data().score - 1);
@@ -125,7 +128,7 @@ const Post = ({
 								score: increment(2),
 							}
 						);
-						await updateDoc(doc(firestore, `UserLikes/${currentUser}`), {
+						await updateDoc(doc(firestore, `UserLikes/${uid}`), {
 							upvotes: arrayUnion(time),
 							downvotes: arrayRemove(time),
 						});
@@ -144,7 +147,7 @@ const Post = ({
 							score: increment(1),
 						}
 					);
-					await updateDoc(doc(firestore, `UserLikes/${currentUser}`), {
+					await updateDoc(doc(firestore, `UserLikes/${uid}`), {
 						upvotes: arrayUnion(time),
 						downvotes: arrayRemove(time),
 					});
@@ -154,6 +157,7 @@ const Post = ({
 			});
 		} catch (error) {
 			console.error(error);
+			alert(error, 'has occured. Please relod page.');
 			return;
 		}
 	};
@@ -164,7 +168,7 @@ const Post = ({
 			return;
 		}
 		try {
-			const docRef = doc(firestore, 'UserLikes', currentUser);
+			const docRef = doc(firestore, 'UserLikes', uid);
 			const docSnap = await getDoc(docRef);
 			const upvote = docSnap.data().upvotes;
 			const downvote = docSnap.data().downvotes;
@@ -186,7 +190,7 @@ const Post = ({
 								score: increment(1),
 							}
 						);
-						await updateDoc(doc(firestore, `UserLikes/${currentUser}`), {
+						await updateDoc(doc(firestore, `UserLikes/${uid}`), {
 							downvotes: arrayRemove(time),
 						});
 						setUpdatedScore(item.data().score + 1);
@@ -205,7 +209,7 @@ const Post = ({
 								score: increment(-2),
 							}
 						);
-						await updateDoc(doc(firestore, `UserLikes/${currentUser}`), {
+						await updateDoc(doc(firestore, `UserLikes/${uid}`), {
 							upvotes: arrayRemove(time),
 							downvotes: arrayUnion(time),
 						});
@@ -224,7 +228,7 @@ const Post = ({
 							score: increment(-1),
 						}
 					);
-					await updateDoc(doc(firestore, `UserLikes/${currentUser}`), {
+					await updateDoc(doc(firestore, `UserLikes/${uid}`), {
 						upvotes: arrayRemove(time),
 						downvotes: arrayUnion(time),
 					});
@@ -234,6 +238,7 @@ const Post = ({
 			});
 		} catch (error) {
 			console.error(error);
+			alert(error, 'has occured. Please relod page.');
 			return;
 		}
 	};
@@ -279,6 +284,7 @@ const Post = ({
 							removePost(true);
 						} catch (error) {
 							console.error(error);
+							alert(error, 'has occured. Please relod page.');
 							return;
 						}
 					},
@@ -329,7 +335,7 @@ const Post = ({
 					<Link to={`/r/${subredditName}/${docID}`}>
 						<p>Comments</p>
 					</Link>
-					{currentUser === name ? (
+					{uid === postUID ? (
 						<button
 							type="button"
 							className="delete-post"

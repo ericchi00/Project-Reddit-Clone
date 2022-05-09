@@ -25,6 +25,8 @@ const Comment = ({
 	currentUser,
 	subreddit,
 	postID,
+	uid,
+	commentUID,
 }) => {
 	const [updatedScore, setUpdatedScore] = useState(score);
 	// sets css class to show vote
@@ -41,7 +43,7 @@ const Comment = ({
 	const addVoteClassOnLoad = async () => {
 		if (!signedIn) return;
 		try {
-			const docRef = doc(firestore, 'UserLikes', currentUser);
+			const docRef = doc(firestore, 'UserLikes', uid);
 			const docSnap = await getDoc(docRef);
 			const upvote = docSnap.data().upvotes;
 			const downvote = docSnap.data().downvotes;
@@ -73,7 +75,7 @@ const Comment = ({
 			return;
 		}
 		try {
-			const docRef = doc(firestore, 'UserLikes', currentUser);
+			const docRef = doc(firestore, 'UserLikes', uid);
 			const docSnap = await getDoc(docRef);
 			const upvote = docSnap.data().upvotes;
 			const downvote = docSnap.data().downvotes;
@@ -98,7 +100,7 @@ const Comment = ({
 								score: increment(-1),
 							}
 						);
-						await updateDoc(doc(firestore, `UserLikes/${currentUser}`), {
+						await updateDoc(doc(firestore, `UserLikes/${uid}`), {
 							upvotes: arrayRemove(time),
 						});
 						setUpdatedScore(item.data().score - 1);
@@ -120,7 +122,7 @@ const Comment = ({
 								score: increment(2),
 							}
 						);
-						await updateDoc(doc(firestore, `UserLikes/${currentUser}`), {
+						await updateDoc(doc(firestore, `UserLikes/${uid}`), {
 							upvotes: arrayUnion(time),
 							downvotes: arrayRemove(time),
 						});
@@ -142,7 +144,7 @@ const Comment = ({
 							score: increment(1),
 						}
 					);
-					await updateDoc(doc(firestore, `UserLikes/${currentUser}`), {
+					await updateDoc(doc(firestore, `UserLikes/${uid}`), {
 						upvotes: arrayUnion(time),
 						downvotes: arrayRemove(time),
 					});
@@ -162,7 +164,7 @@ const Comment = ({
 			return;
 		}
 		try {
-			const docRef = doc(firestore, 'UserLikes', currentUser);
+			const docRef = doc(firestore, 'UserLikes', uid);
 			const docSnap = await getDoc(docRef);
 			const upvote = docSnap.data().upvotes;
 			const downvote = docSnap.data().downvotes;
@@ -187,7 +189,7 @@ const Comment = ({
 								score: increment(1),
 							}
 						);
-						await updateDoc(doc(firestore, `UserLikes/${currentUser}`), {
+						await updateDoc(doc(firestore, `UserLikes/${uid}`), {
 							downvotes: arrayRemove(time),
 						});
 						setUpdatedScore(item.data().score + 1);
@@ -209,7 +211,7 @@ const Comment = ({
 								score: increment(-2),
 							}
 						);
-						await updateDoc(doc(firestore, `UserLikes/${currentUser}`), {
+						await updateDoc(doc(firestore, `UserLikes/${uid}`), {
 							upvotes: arrayRemove(time),
 							downvotes: arrayUnion(time),
 						});
@@ -231,7 +233,7 @@ const Comment = ({
 							score: increment(-1),
 						}
 					);
-					await updateDoc(doc(firestore, `UserLikes/${currentUser}`), {
+					await updateDoc(doc(firestore, `UserLikes/${uid}`), {
 						upvotes: arrayRemove(time),
 						downvotes: arrayUnion(time),
 					});
@@ -289,6 +291,7 @@ const Comment = ({
 							});
 						} catch (error) {
 							console.error(error);
+							alert(error, 'has occurred. Please reload page and try again');
 							return;
 						}
 					},
@@ -330,6 +333,7 @@ const Comment = ({
 			});
 		} catch (error) {
 			console.error(error);
+			alert(error, 'has occurred. Please reload page and try again');
 			return;
 		}
 	};
@@ -353,7 +357,7 @@ const Comment = ({
 					<div className="comment-time">
 						{formatDistanceToNow(time, { includeSeconds: true })} ago
 					</div>
-					{currentUser === name ? (
+					{commentUID === uid ? (
 						<>
 							<button
 								type="button"

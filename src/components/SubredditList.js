@@ -16,7 +16,11 @@ const SubredditList = (props) => {
 	const [list, setList] = useState([]);
 
 	useEffect(() => {
-		const getSubreddits = async () => {
+		getSubreddits();
+	}, [create]);
+
+	const getSubreddits = async () => {
+		try {
 			const listArr = [];
 			const firestore = getFirestore();
 			const collectionRef = collection(firestore, 'Subreddit');
@@ -27,9 +31,11 @@ const SubredditList = (props) => {
 				listArr.push(doc.data().name);
 			});
 			setList(listArr);
-		};
-		getSubreddits();
-	}, [create]);
+		} catch (error) {
+			console.error(error);
+			return;
+		}
+	};
 
 	const handleInput = (e) => {
 		const { value } = e.target;
@@ -38,17 +44,22 @@ const SubredditList = (props) => {
 	};
 
 	const onSubmit = async (e) => {
-		e.preventDefault();
-		const db = getFirestore();
-		const checkIfSubredditExists = doc(db, 'Subreddit', name);
-		const subreddit = await getDoc(checkIfSubredditExists);
-		if (!subreddit.exists()) {
-			await setDoc(doc(db, 'Subreddit', name), { name: name });
-			setCreate(false);
-		} else {
-			const create = document.getElementsByName('create')[0];
-			create.value = '';
-			create.placeholder = 'Subreddit already exists';
+		try {
+			e.preventDefault();
+			const db = getFirestore();
+			const checkIfSubredditExists = doc(db, 'Subreddit', name);
+			const subreddit = await getDoc(checkIfSubredditExists);
+			if (!subreddit.exists()) {
+				await setDoc(doc(db, 'Subreddit', name), { name: name });
+				setCreate(false);
+			} else {
+				const create = document.getElementsByName('create')[0];
+				create.value = '';
+				create.placeholder = 'Subreddit already exists';
+			}
+		} catch (error) {
+			console.log(error);
+			return;
 		}
 	};
 	return (

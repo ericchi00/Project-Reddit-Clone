@@ -50,26 +50,31 @@ const Post = ({
 	}, [score]);
 
 	const addVoteClassOnLoad = async () => {
-		if (!signedIn) return;
-		const docRef = doc(firestore, 'UserLikes', currentUser);
-		const docSnap = await getDoc(docRef);
-		const upvote = docSnap.data().upvotes;
-		const downvote = docSnap.data().downvotes;
-		if (upvote.length > 0) {
-			upvote.forEach((vote) => {
-				if (vote === time) {
-					setUpvoteActive(true);
-					setDownvoteActive(false);
-				}
-			});
-		}
-		if (downvote.length > 0) {
-			downvote.forEach((vote) => {
-				if (vote === time) {
-					setDownvoteActive(true);
-					setUpvoteActive(false);
-				}
-			});
+		try {
+			if (!signedIn) return;
+			const docRef = doc(firestore, 'UserLikes', currentUser);
+			const docSnap = await getDoc(docRef);
+			const upvote = docSnap.data().upvotes;
+			const downvote = docSnap.data().downvotes;
+			if (upvote.length > 0) {
+				upvote.forEach((vote) => {
+					if (vote === time) {
+						setUpvoteActive(true);
+						setDownvoteActive(false);
+					}
+				});
+			}
+			if (downvote.length > 0) {
+				downvote.forEach((vote) => {
+					if (vote === time) {
+						setDownvoteActive(true);
+						setUpvoteActive(false);
+					}
+				});
+			}
+		} catch (error) {
+			console.error(error);
+			return;
 		}
 	};
 
@@ -78,22 +83,141 @@ const Post = ({
 			alert('You must be signed in to vote.');
 			return;
 		}
-		const docRef = doc(firestore, 'UserLikes', currentUser);
-		const docSnap = await getDoc(docRef);
-		const upvote = docSnap.data().upvotes;
-		const downvote = docSnap.data().downvotes;
+		try {
+			const docRef = doc(firestore, 'UserLikes', currentUser);
+			const docSnap = await getDoc(docRef);
+			const upvote = docSnap.data().upvotes;
+			const downvote = docSnap.data().downvotes;
 
-		const collectionRef = collection(
-			firestore,
-			`Subreddit/${subredditName}/posts`
-		);
-		const q = query(collectionRef);
-		const querySnapshot = await getDocs(q);
-		querySnapshot.forEach(async (item) => {
-			// searches if user already upvoted & removes it
-			if (upvote.length > 0) {
-				const originalVote = upvote.filter((item) => item === time);
-				if (item.data().timestamp === originalVote[0]) {
+			const collectionRef = collection(
+				firestore,
+				`Subreddit/${subredditName}/posts`
+			);
+			const q = query(collectionRef);
+			const querySnapshot = await getDocs(q);
+			querySnapshot.forEach(async (item) => {
+				// searches if user already upvoted & removes it
+				if (upvote.length > 0) {
+					const originalVote = upvote.filter((item) => item === time);
+					if (item.data().timestamp === originalVote[0]) {
+						await updateDoc(
+							doc(firestore, `Subreddit/${subredditName}/posts/${item.id}`),
+							{
+								score: increment(-1),
+							}
+						);
+						await updateDoc(doc(firestore, `UserLikes/${currentUser}`), {
+							upvotes: arrayRemove(time),
+						});
+						setUpdatedScore(item.data().score - 1);
+						setUpvoteActive(false);
+						return;
+					}
+				}
+
+				// if user already downvoted, and then upvotes, it'll add 2 to score
+				if (downvote.length > 0) {
+					const originalVote = downvote.filter((item) => item === time);
+					if (item.data().timestamp === originalVote[0]) {
+						await updateDoc(
+							doc(firestore, `Subreddit/${subredditName}/posts/${item.id}`),
+							{
+								score: increment(2),
+							}
+						);
+						await updateDoc(doc(firestore, `UserLikes/${currentUser}`), {
+							upvotes: arrayUnion(time),
+							downvotes: arrayRemove(time),
+						});
+						setUpdatedScore(item.data().score + 2);
+						setUpvoteActive(true);
+						setDownvoteActive(false);
+						return;
+					}
+				}
+
+				// updates vote if user hasn't already upvoted
+				if (item.data().timestamp === time) {
+					await updateDoc(
+						doc(firestore, `Subreddit/${subredditName}/posts/${item.id}`),
+						{
+							score: increment(1),
+						}
+					);
+					await updateDoc(doc(firestore, `UserLikes/${currentUser}`), {
+						upvotes: arrayUnion(time),
+						downvotes: arrayRemove(time),
+					});
+					setUpvoteActive(true);
+					setUpdatedScore(item.data().score + 1);
+				}
+			});
+		} catch (error) {
+			console.error(error);
+			return;
+		}
+	};
+
+	const downVote = async () => {
+		if (!signedIn) {
+			alert('You must be signed in to vote.');
+			return;
+		}
+		try {
+			const docRef = doc(firestore, 'UserLikes', currentUser);
+			const docSnap = await getDoc(docRef);
+			const upvote = docSnap.data().upvotes;
+			const downvote = docSnap.data().downvotes;
+
+			const collectionRef = collection(
+				firestore,
+				`Subreddit/${subredditName}/posts`
+			);
+			const q = query(collectionRef);
+			const querySnapshot = await getDocs(q);
+			querySnapshot.forEach(async (item) => {
+				// searches if user already downvoted & removes it
+				if (downvote.length > 0) {
+					const originalVote = downvote.filter((item) => item === time);
+					if (item.data().timestamp === originalVote[0]) {
+						await updateDoc(
+							doc(firestore, `Subreddit/${subredditName}/posts/${item.id}`),
+							{
+								score: increment(1),
+							}
+						);
+						await updateDoc(doc(firestore, `UserLikes/${currentUser}`), {
+							downvotes: arrayRemove(time),
+						});
+						setUpdatedScore(item.data().score + 1);
+						setDownvoteActive(false);
+						return;
+					}
+				}
+
+				// if user already upvoted post and then downvotes it, it'll -2 from score
+				if (upvote.length > 0) {
+					const originalVote = upvote.filter((item) => item === time);
+					if (item.data().timestamp === originalVote[0]) {
+						await updateDoc(
+							doc(firestore, `Subreddit/${subredditName}/posts/${item.id}`),
+							{
+								score: increment(-2),
+							}
+						);
+						await updateDoc(doc(firestore, `UserLikes/${currentUser}`), {
+							upvotes: arrayRemove(time),
+							downvotes: arrayUnion(time),
+						});
+						setUpdatedScore(item.data().score - 2);
+						setDownvoteActive(true);
+						setUpvoteActive(false);
+						return;
+					}
+				}
+
+				// downvotes if user already hasn't downvoted
+				if (item.data().timestamp === time) {
 					await updateDoc(
 						doc(firestore, `Subreddit/${subredditName}/posts/${item.id}`),
 						{
@@ -102,125 +226,16 @@ const Post = ({
 					);
 					await updateDoc(doc(firestore, `UserLikes/${currentUser}`), {
 						upvotes: arrayRemove(time),
-					});
-					setUpdatedScore(item.data().score - 1);
-					setUpvoteActive(false);
-					return;
-				}
-			}
-
-			// if user already downvoted, and then upvotes, it'll add 2 to score
-			if (downvote.length > 0) {
-				const originalVote = downvote.filter((item) => item === time);
-				if (item.data().timestamp === originalVote[0]) {
-					await updateDoc(
-						doc(firestore, `Subreddit/${subredditName}/posts/${item.id}`),
-						{
-							score: increment(2),
-						}
-					);
-					await updateDoc(doc(firestore, `UserLikes/${currentUser}`), {
-						upvotes: arrayUnion(time),
-						downvotes: arrayRemove(time),
-					});
-					setUpdatedScore(item.data().score + 2);
-					setUpvoteActive(true);
-					setDownvoteActive(false);
-					return;
-				}
-			}
-
-			// updates vote if user hasn't already upvoted
-			if (item.data().timestamp === time) {
-				await updateDoc(
-					doc(firestore, `Subreddit/${subredditName}/posts/${item.id}`),
-					{
-						score: increment(1),
-					}
-				);
-				await updateDoc(doc(firestore, `UserLikes/${currentUser}`), {
-					upvotes: arrayUnion(time),
-					downvotes: arrayRemove(time),
-				});
-				setUpvoteActive(true);
-				setUpdatedScore(item.data().score + 1);
-			}
-		});
-	};
-
-	const downVote = async () => {
-		if (!signedIn) {
-			alert('You must be signed in to vote.');
-			return;
-		}
-		const docRef = doc(firestore, 'UserLikes', currentUser);
-		const docSnap = await getDoc(docRef);
-		const upvote = docSnap.data().upvotes;
-		const downvote = docSnap.data().downvotes;
-
-		const collectionRef = collection(
-			firestore,
-			`Subreddit/${subredditName}/posts`
-		);
-		const q = query(collectionRef);
-		const querySnapshot = await getDocs(q);
-		querySnapshot.forEach(async (item) => {
-			// searches if user already downvoted & removes it
-			if (downvote.length > 0) {
-				const originalVote = downvote.filter((item) => item === time);
-				if (item.data().timestamp === originalVote[0]) {
-					await updateDoc(
-						doc(firestore, `Subreddit/${subredditName}/posts/${item.id}`),
-						{
-							score: increment(1),
-						}
-					);
-					await updateDoc(doc(firestore, `UserLikes/${currentUser}`), {
-						downvotes: arrayRemove(time),
-					});
-					setUpdatedScore(item.data().score + 1);
-					setDownvoteActive(false);
-					return;
-				}
-			}
-
-			// if user already upvoted post and then downvotes it, it'll -2 from score
-			if (upvote.length > 0) {
-				const originalVote = upvote.filter((item) => item === time);
-				if (item.data().timestamp === originalVote[0]) {
-					await updateDoc(
-						doc(firestore, `Subreddit/${subredditName}/posts/${item.id}`),
-						{
-							score: increment(-2),
-						}
-					);
-					await updateDoc(doc(firestore, `UserLikes/${currentUser}`), {
-						upvotes: arrayRemove(time),
 						downvotes: arrayUnion(time),
 					});
-					setUpdatedScore(item.data().score - 2);
+					setUpdatedScore(item.data().score - 1);
 					setDownvoteActive(true);
-					setUpvoteActive(false);
-					return;
 				}
-			}
-
-			// downvotes if user already hasn't downvoted
-			if (item.data().timestamp === time) {
-				await updateDoc(
-					doc(firestore, `Subreddit/${subredditName}/posts/${item.id}`),
-					{
-						score: increment(-1),
-					}
-				);
-				await updateDoc(doc(firestore, `UserLikes/${currentUser}`), {
-					upvotes: arrayRemove(time),
-					downvotes: arrayUnion(time),
-				});
-				setUpdatedScore(item.data().score - 1);
-				setDownvoteActive(true);
-			}
-		});
+			});
+		} catch (error) {
+			console.error(error);
+			return;
+		}
 	};
 
 	const deletePost = async () => {
@@ -238,29 +253,34 @@ const Post = ({
 				{
 					label: 'Yes',
 					onClick: async () => {
-						// removes all comments from post
-						const collectionRef = collection(
-							firestore,
-							`Subreddit/${subredditName}/posts/${docID}/comments`
-						);
-						const q = query(collectionRef);
-						const querySnapshot = await getDocs(q);
-						querySnapshot.forEach((item) => {
-							deleteDoc(
-								doc(
-									firestore,
-									`Subreddit/${subredditName}/posts/${docID}/comments/${item.id}`
-								)
+						try {
+							// removes all comments from post
+							const collectionRef = collection(
+								firestore,
+								`Subreddit/${subredditName}/posts/${docID}/comments`
 							);
-						});
+							const q = query(collectionRef);
+							const querySnapshot = await getDocs(q);
+							querySnapshot.forEach((item) => {
+								deleteDoc(
+									doc(
+										firestore,
+										`Subreddit/${subredditName}/posts/${docID}/comments/${item.id}`
+									)
+								);
+							});
 
-						// removes posts
-						const docRef = doc(
-							firestore,
-							`Subreddit/${subredditName}/posts/${docID}`
-						);
-						await deleteDoc(docRef);
-						removePost(true);
+							// removes posts
+							const docRef = doc(
+								firestore,
+								`Subreddit/${subredditName}/posts/${docID}`
+							);
+							await deleteDoc(docRef);
+							removePost(true);
+						} catch (error) {
+							console.error(error);
+							return;
+						}
 					},
 				},
 			],

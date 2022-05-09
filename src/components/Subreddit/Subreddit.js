@@ -65,18 +65,23 @@ const Subreddit = ({ currentUser, signedIn }) => {
 			alert('You must be signed in to create a post.');
 			return;
 		}
-		if (title.length <= 0 && text.length <= 0) return;
-		const firestore = getFirestore();
-		await addDoc(collection(firestore, `Subreddit/${subreddit}/posts`), {
-			title: title,
-			name: currentUser,
-			score: 1,
-			text: text,
-			timestamp: Date.now(),
-		});
-		setCreatePost(false);
-		const form = document.getElementById('create-post-form');
-		form.reset();
+		try {
+			if (title.length <= 0 && text.length <= 0) return;
+			const firestore = getFirestore();
+			await addDoc(collection(firestore, `Subreddit/${subreddit}/posts`), {
+				title: title,
+				name: currentUser,
+				score: 1,
+				text: text,
+				timestamp: Date.now(),
+			});
+			setCreatePost(false);
+			const form = document.getElementById('create-post-form');
+			form.reset();
+		} catch (error) {
+			console.error(error);
+			return;
+		}
 	};
 
 	return (

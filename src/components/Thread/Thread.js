@@ -77,6 +77,7 @@ const Thread = ({ currentUser, signedIn }) => {
 			});
 		} catch (error) {
 			alert(error, 'has occured. Please reload page');
+			return;
 		}
 	};
 
@@ -106,24 +107,29 @@ const Thread = ({ currentUser, signedIn }) => {
 
 	const addVoteClassOnLoad = async () => {
 		if (!signedIn) return;
-		const docRef = doc(firestore, 'UserLikes', currentUser);
-		const docSnap = await getDoc(docRef);
-		const upvote = docSnap.data().upvotes;
-		const downvote = docSnap.data().downvotes;
-		if (upvote.length > 0) {
-			upvote.forEach((vote) => {
-				if (vote === time) {
-					setUpvoteActive(true);
-					setDownvoteActive(false);
-				}
-			});
-		} else if (downvote.length > 0) {
-			downvote.forEach((vote) => {
-				if (vote === time) {
-					setDownvoteActive(true);
-					setUpvoteActive(false);
-				}
-			});
+		try {
+			const docRef = doc(firestore, 'UserLikes', currentUser);
+			const docSnap = await getDoc(docRef);
+			const upvote = docSnap.data().upvotes;
+			const downvote = docSnap.data().downvotes;
+			if (upvote.length > 0) {
+				upvote.forEach((vote) => {
+					if (vote === time) {
+						setUpvoteActive(true);
+						setDownvoteActive(false);
+					}
+				});
+			} else if (downvote.length > 0) {
+				downvote.forEach((vote) => {
+					if (vote === time) {
+						setDownvoteActive(true);
+						setUpvoteActive(false);
+					}
+				});
+			}
+		} catch (error) {
+			console.error(error);
+			return;
 		}
 	};
 
@@ -132,19 +138,145 @@ const Thread = ({ currentUser, signedIn }) => {
 			alert('You must be signed in to vote.');
 			return;
 		}
-		const docRef = doc(firestore, 'UserLikes', currentUser);
-		const docSnap = await getDoc(docRef);
-		const upvote = docSnap.data().upvotes;
-		const downvote = docSnap.data().downvotes;
+		try {
+			const docRef = doc(firestore, 'UserLikes', currentUser);
+			const docSnap = await getDoc(docRef);
+			const upvote = docSnap.data().upvotes;
+			const downvote = docSnap.data().downvotes;
 
-		const collectionRef = collection(firestore, `Subreddit/${subreddit}/posts`);
-		const q = query(collectionRef);
-		const querySnapshot = await getDocs(q);
-		querySnapshot.forEach(async (item) => {
-			// searches if user already upvoted & removes it if user upvotes again
-			if (upvote.length > 0) {
-				const originalVote = upvote.filter((item) => item === postInfo.time);
-				if (item.data().timestamp === originalVote[0]) {
+			const collectionRef = collection(
+				firestore,
+				`Subreddit/${subreddit}/posts`
+			);
+			const q = query(collectionRef);
+			const querySnapshot = await getDocs(q);
+			querySnapshot.forEach(async (item) => {
+				// searches if user already upvoted & removes it if user upvotes again
+				if (upvote.length > 0) {
+					const originalVote = upvote.filter((item) => item === postInfo.time);
+					if (item.data().timestamp === originalVote[0]) {
+						await updateDoc(
+							doc(firestore, `Subreddit/${subreddit}/posts/${item.id}`),
+							{
+								score: increment(-1),
+							}
+						);
+						await updateDoc(doc(firestore, `UserLikes/${currentUser}`), {
+							upvotes: arrayRemove(postInfo.time),
+						});
+						setUpdatedScore(item.data().score - 1);
+						setUpvoteActive(false);
+						return;
+					}
+				}
+
+				// if user already downvoted, and then upvotes, it'll add 2 to score
+				if (downvote.length > 0) {
+					const originalVote = downvote.filter(
+						(item) => item === postInfo.time
+					);
+					if (item.data().timestamp === originalVote[0]) {
+						await updateDoc(
+							doc(firestore, `Subreddit/${subreddit}/posts/${item.id}`),
+							{
+								score: increment(2),
+							}
+						);
+						await updateDoc(doc(firestore, `UserLikes/${currentUser}`), {
+							upvotes: arrayUnion(postInfo.time),
+							downvotes: arrayRemove(postInfo.time),
+						});
+						setUpdatedScore(item.data().score + 2);
+						setUpvoteActive(true);
+						setDownvoteActive(false);
+						return;
+					}
+				}
+
+				// updates vote if user hasn't already upvoted
+				if (item.data().timestamp === postInfo.time) {
+					await updateDoc(
+						doc(firestore, `Subreddit/${subreddit}/posts/${item.id}`),
+						{
+							score: increment(1),
+						}
+					);
+					await updateDoc(doc(firestore, `UserLikes/${currentUser}`), {
+						upvotes: arrayUnion(postInfo.time),
+						downvotes: arrayRemove(postInfo.time),
+					});
+					setUpvoteActive(true);
+					setUpdatedScore(item.data().score + 1);
+				}
+			});
+		} catch (error) {
+			console.error(error);
+			return;
+		}
+	};
+
+	const downVote = async () => {
+		if (!signedIn) {
+			alert('You must be signed in to vote.');
+			return;
+		}
+		try {
+			const docRef = doc(firestore, 'UserLikes', currentUser);
+			const docSnap = await getDoc(docRef);
+			const upvote = docSnap.data().upvotes;
+			const downvote = docSnap.data().downvotes;
+
+			const collectionRef = collection(
+				firestore,
+				`Subreddit/${subreddit}/posts`
+			);
+			const q = query(collectionRef);
+			const querySnapshot = await getDocs(q);
+			querySnapshot.forEach(async (item) => {
+				// searches if user already downvoted & removes it
+				if (downvote.length > 0) {
+					const originalVote = downvote.filter(
+						(item) => item === postInfo.time
+					);
+					if (item.data().timestamp === originalVote[0]) {
+						await updateDoc(
+							doc(firestore, `Subreddit/${subreddit}/posts/${item.id}`),
+							{
+								score: increment(1),
+							}
+						);
+						await updateDoc(doc(firestore, `UserLikes/${currentUser}`), {
+							downvotes: arrayRemove(postInfo.time),
+						});
+						setUpdatedScore(item.data().score + 1);
+						setDownvoteActive(false);
+						return;
+					}
+				}
+
+				// if user already upvoted post and then downvotes it, it'll -2 from score
+				if (upvote.length > 0) {
+					const originalVote = upvote.filter((item) => item === postInfo.time);
+					if (item.data().timestamp === originalVote[0]) {
+						await updateDoc(
+							doc(firestore, `Subreddit/${subreddit}/posts/${item.id}`),
+							{
+								score: increment(-2),
+							}
+						);
+						await updateDoc(doc(firestore, `UserLikes/${currentUser}`), {
+							upvotes: arrayRemove(postInfo.time),
+							downvotes: arrayUnion(postInfo.time),
+						});
+						setUpdatedScore(item.data().score - 2);
+						setDownvoteActive(true);
+						setUpvoteActive(false);
+						return;
+					}
+				}
+
+				// downvotes if user already hasn't downvoted
+				if (item.data().timestamp === postInfo.time) {
 					await updateDoc(
 						doc(firestore, `Subreddit/${subreddit}/posts/${item.id}`),
 						{
@@ -153,122 +285,16 @@ const Thread = ({ currentUser, signedIn }) => {
 					);
 					await updateDoc(doc(firestore, `UserLikes/${currentUser}`), {
 						upvotes: arrayRemove(postInfo.time),
-					});
-					setUpdatedScore(item.data().score - 1);
-					setUpvoteActive(false);
-					return;
-				}
-			}
-
-			// if user already downvoted, and then upvotes, it'll add 2 to score
-			if (downvote.length > 0) {
-				const originalVote = downvote.filter((item) => item === postInfo.time);
-				if (item.data().timestamp === originalVote[0]) {
-					await updateDoc(
-						doc(firestore, `Subreddit/${subreddit}/posts/${item.id}`),
-						{
-							score: increment(2),
-						}
-					);
-					await updateDoc(doc(firestore, `UserLikes/${currentUser}`), {
-						upvotes: arrayUnion(postInfo.time),
-						downvotes: arrayRemove(postInfo.time),
-					});
-					setUpdatedScore(item.data().score + 2);
-					setUpvoteActive(true);
-					setDownvoteActive(false);
-					return;
-				}
-			}
-
-			// updates vote if user hasn't already upvoted
-			if (item.data().timestamp === postInfo.time) {
-				await updateDoc(
-					doc(firestore, `Subreddit/${subreddit}/posts/${item.id}`),
-					{
-						score: increment(1),
-					}
-				);
-				await updateDoc(doc(firestore, `UserLikes/${currentUser}`), {
-					upvotes: arrayUnion(postInfo.time),
-					downvotes: arrayRemove(postInfo.time),
-				});
-				setUpvoteActive(true);
-				setUpdatedScore(item.data().score + 1);
-			}
-		});
-	};
-
-	const downVote = async () => {
-		if (!signedIn) {
-			alert('You must be signed in to vote.');
-			return;
-		}
-		const docRef = doc(firestore, 'UserLikes', currentUser);
-		const docSnap = await getDoc(docRef);
-		const upvote = docSnap.data().upvotes;
-		const downvote = docSnap.data().downvotes;
-
-		const collectionRef = collection(firestore, `Subreddit/${subreddit}/posts`);
-		const q = query(collectionRef);
-		const querySnapshot = await getDocs(q);
-		querySnapshot.forEach(async (item) => {
-			// searches if user already downvoted & removes it
-			if (downvote.length > 0) {
-				const originalVote = downvote.filter((item) => item === postInfo.time);
-				if (item.data().timestamp === originalVote[0]) {
-					await updateDoc(
-						doc(firestore, `Subreddit/${subreddit}/posts/${item.id}`),
-						{
-							score: increment(1),
-						}
-					);
-					await updateDoc(doc(firestore, `UserLikes/${currentUser}`), {
-						downvotes: arrayRemove(postInfo.time),
-					});
-					setUpdatedScore(item.data().score + 1);
-					setDownvoteActive(false);
-					return;
-				}
-			}
-
-			// if user already upvoted post and then downvotes it, it'll -2 from score
-			if (upvote.length > 0) {
-				const originalVote = upvote.filter((item) => item === postInfo.time);
-				if (item.data().timestamp === originalVote[0]) {
-					await updateDoc(
-						doc(firestore, `Subreddit/${subreddit}/posts/${item.id}`),
-						{
-							score: increment(-2),
-						}
-					);
-					await updateDoc(doc(firestore, `UserLikes/${currentUser}`), {
-						upvotes: arrayRemove(postInfo.time),
 						downvotes: arrayUnion(postInfo.time),
 					});
-					setUpdatedScore(item.data().score - 2);
+					setUpdatedScore(item.data().score - 1);
 					setDownvoteActive(true);
-					setUpvoteActive(false);
-					return;
 				}
-			}
-
-			// downvotes if user already hasn't downvoted
-			if (item.data().timestamp === postInfo.time) {
-				await updateDoc(
-					doc(firestore, `Subreddit/${subreddit}/posts/${item.id}`),
-					{
-						score: increment(-1),
-					}
-				);
-				await updateDoc(doc(firestore, `UserLikes/${currentUser}`), {
-					upvotes: arrayRemove(postInfo.time),
-					downvotes: arrayUnion(postInfo.time),
-				});
-				setUpdatedScore(item.data().score - 1);
-				setDownvoteActive(true);
-			}
-		});
+			});
+		} catch (error) {
+			console.error(error);
+			return;
+		}
 	};
 
 	const submitComment = async (e) => {
@@ -277,33 +303,38 @@ const Thread = ({ currentUser, signedIn }) => {
 			alert('You must be signed in to comment.');
 			return;
 		}
-		const comment = document.getElementById('comment');
-		comment.placeholder = 'Comment needs to be longer than 1 character.';
-		if (commentText <= 1) {
+		try {
+			const comment = document.getElementById('comment');
 			comment.placeholder = 'Comment needs to be longer than 1 character.';
+			if (commentText <= 1) {
+				comment.placeholder = 'Comment needs to be longer than 1 character.';
+				return;
+			}
+			await addDoc(
+				collection(
+					firestore,
+					'Subreddit',
+					`${subreddit}`,
+					'posts',
+					postID,
+					'comments'
+				),
+				{
+					name: currentUser,
+					score: 1,
+					text: commentText,
+					timestamp: Date.now(),
+				}
+			);
+			const form = document.getElementById('comment-form');
+			form.reset();
+			setCommentText(null);
+			comment.placeholder = 'Enter a comment';
+			setNewComment(true);
+		} catch (error) {
+			console.error(error);
 			return;
 		}
-		await addDoc(
-			collection(
-				firestore,
-				'Subreddit',
-				`${subreddit}`,
-				'posts',
-				postID,
-				'comments'
-			),
-			{
-				name: currentUser,
-				score: 1,
-				text: commentText,
-				timestamp: Date.now(),
-			}
-		);
-		const form = document.getElementById('comment-form');
-		form.reset();
-		setCommentText(null);
-		comment.placeholder = 'Enter a comment';
-		setNewComment(true);
 	};
 
 	const sortHandler = (e) => {
@@ -327,28 +358,33 @@ const Thread = ({ currentUser, signedIn }) => {
 					label: 'Yes',
 					onClick: async () => {
 						// removes all comments from post
-						const collectionRef = collection(
-							firestore,
-							`Subreddit/${subreddit}/posts/${postID}/comments`
-						);
-						const q = query(collectionRef);
-						const querySnapshot = await getDocs(q);
-						querySnapshot.forEach((item) => {
-							deleteDoc(
-								doc(
-									firestore,
-									`Subreddit/${subreddit}/posts/${postID}/comments/${item.id}`
-								)
+						try {
+							const collectionRef = collection(
+								firestore,
+								`Subreddit/${subreddit}/posts/${postID}/comments`
 							);
-						});
+							const q = query(collectionRef);
+							const querySnapshot = await getDocs(q);
+							querySnapshot.forEach((item) => {
+								deleteDoc(
+									doc(
+										firestore,
+										`Subreddit/${subreddit}/posts/${postID}/comments/${item.id}`
+									)
+								);
+							});
 
-						// removes comments from post
-						const docRef = doc(
-							firestore,
-							`Subreddit/${subreddit}/posts/${postID}`
-						);
-						await deleteDoc(docRef);
-						window.location.href = `/r/${subreddit}`;
+							// removes comments from post
+							const docRef = doc(
+								firestore,
+								`Subreddit/${subreddit}/posts/${postID}`
+							);
+							await deleteDoc(docRef);
+							window.location.href = `/r/${subreddit}`;
+						} catch (error) {
+							console.error(error);
+							return;
+						}
 					},
 				},
 			],
@@ -363,19 +399,24 @@ const Thread = ({ currentUser, signedIn }) => {
 	};
 
 	const submitEdit = async () => {
-		const newText = document
-			.querySelector('.post-text')
-			.querySelector('div').innerText;
-		if (newText.length <= 1) {
-			alert('Post must be greater than one character');
+		try {
+			const newText = document
+				.querySelector('.post-text')
+				.querySelector('div').innerText;
+			if (newText.length <= 1) {
+				alert('Post must be greater than one character');
+				return;
+			}
+			await updateDoc(
+				doc(firestore, 'Subreddit', `${subreddit}`, 'posts', `${postID}`),
+				{ text: newText }
+			);
+			// provides UI feedback that the edit was saved
+			window.location.href = `/r/${subreddit}/${postID}`;
+		} catch (error) {
+			console.error(error);
 			return;
 		}
-		await updateDoc(
-			doc(firestore, 'Subreddit', `${subreddit}`, 'posts', `${postID}`),
-			{ text: newText }
-		);
-		// provides UI feedback that the edit was saved
-		window.location.href = `/r/${subreddit}/${postID}`;
 	};
 
 	return (

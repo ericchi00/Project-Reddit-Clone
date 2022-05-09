@@ -42,6 +42,7 @@ const Homepage = ({ signedIn, currentUser }) => {
 			});
 		} catch (error) {
 			alert(error, 'Please try reloading page');
+			return;
 		}
 	};
 

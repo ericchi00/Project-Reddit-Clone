@@ -20,6 +20,8 @@ const Subreddit = ({ currentUser, signedIn, uid }) => {
 	const [sort, setSort] = useState('hot');
 	const { subreddit } = useParams();
 
+	const [loading, setLoading] = useState(true);
+
 	// state to pass down to post
 	const [removePost, setRemovePost] = useState(null);
 
@@ -47,6 +49,7 @@ const Subreddit = ({ currentUser, signedIn, uid }) => {
 			});
 		}
 		setPosts(postsArr);
+		setLoading(false);
 	};
 
 	const titleHandler = (e) => {
@@ -92,32 +95,53 @@ const Subreddit = ({ currentUser, signedIn, uid }) => {
 				<button onClick={() => setSort('new')}>New</button>
 			</div>
 			<h2>r/{subreddit}</h2>
-			{posts.length <= 0 ? (
-				<div className="subreddit-empty">
-					Subreddit is empty. Make the first post!
+			{loading ? (
+				<div className="lds-spinner">
+					Loading
+					<div></div>
+					<div></div>
+					<div></div>
+					<div></div>
+					<div></div>
+					<div></div>
+					<div></div>
+					<div></div>
+					<div></div>
+					<div></div>
+					<div></div>
+					<div></div>
 				</div>
 			) : (
-				<ul>
-					{posts.map((post, i) => {
-						return (
-							<Post
-								uid={uid}
-								postUID={post.data.uid}
-								removePost={setRemovePost}
-								currentUser={currentUser}
-								signedIn={signedIn}
-								time={post.data.timestamp}
-								name={post.data.name}
-								score={post.data.score}
-								title={post.data.title}
-								text={post.data.text}
-								docID={post.id}
-								key={post.data.timestamp}
-								index={i + 1}
-							/>
-						);
-					})}
-				</ul>
+				<>
+					{' '}
+					{posts.length <= 0 ? (
+						<div className="subreddit-empty">
+							Subreddit is empty. Make the first post!
+						</div>
+					) : (
+						<ul>
+							{posts.map((post, i) => {
+								return (
+									<Post
+										uid={uid}
+										postUID={post.data.uid}
+										removePost={setRemovePost}
+										currentUser={currentUser}
+										signedIn={signedIn}
+										time={post.data.timestamp}
+										name={post.data.name}
+										score={post.data.score}
+										title={post.data.title}
+										text={post.data.text}
+										docID={post.id}
+										key={post.data.timestamp}
+										index={i + 1}
+									/>
+								);
+							})}
+						</ul>
+					)}
+				</>
 			)}
 			<button
 				type="button"
